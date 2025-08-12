@@ -11,11 +11,9 @@
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title mb-0">Paralelos registrados</h3>
-                @createButton(['module' => 'paralelos'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        Crear nuevo paralelo
-                    </button>
-                @endcreateButton
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Crear nuevo paralelo
+                </button>
             </div>
 
             <div class="card-body">
@@ -37,30 +35,21 @@
                                     <td>{{ $paralelo->nombre }}</td>
                                     <td>{{ $paralelo->grado->nombre }} - {{ $nivel }}</td>
                                     <td class="text-center">
-                                        @editButton(['module' => 'paralelos'])
-                                            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
-                                                data-target="#ModalUpdate{{ $paralelo->id }}">
-                                                <i class="fas fa-pencil-alt"></i> Editar
+                                        <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
+                                            data-target="#ModalUpdate{{ $paralelo->id }}">
+                                            <i class="fas fa-pencil-alt"></i> Editar
+                                        </button>
+                                        <form action="{{ url('admin/paralelos/' . $paralelo->id) }}" method="POST" class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
                                             </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'paralelos'])
-                                            <form action="{{ url('admin/paralelos/' . $paralelo->id) }}" method="POST" class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash-alt"></i> Eliminar
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'paralelos'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </td>
                                 </tr>
 
-                                @modalEdit(['module' => 'paralelos'])
+                                <!-- Modal Editar -->
                                 <div class="modal fade" id="ModalUpdate{{ $paralelo->id }}" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -100,7 +89,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                @endmodalEdit
                             @endforeach
                         </tbody>
                     </table>
@@ -110,7 +98,7 @@
     </div>
 </div>
 
-@modalCreate(['module' => 'paralelos'])
+<!-- Modal Crear -->
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -154,19 +142,18 @@
         </div>
     </div>
 </div>
-@endmodalCreate
 @stop
 
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@showModalOnErrors(['module' => 'paralelos'])
+@if ($errors->any())
     <script>
         $(document).ready(function () {
             $('#ModalCreate').modal('show');
         });
     </script>
-@endshowModalOnErrors
+@endif
 
 @if(session('mensaje'))
 <script>

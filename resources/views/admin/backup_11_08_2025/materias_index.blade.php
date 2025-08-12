@@ -1,7 +1,8 @@
 @extends('adminlte::page')
 
+
 @section('content_header')
-    <h1>Listado de niveles</h1>
+    <h1>Listado de materias</h1>
     <hr>
 @stop
 
@@ -10,17 +11,16 @@
     <div class="col-md-6">
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title mb-0">Niveles registrados</h3>
+                <h3 class="card-title mb-0">Materias registradas</h3>
 
-                @createButton(['module' => 'niveles'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        Crear nuevo nivel
-                    </button>
-                @endcreateButton
+                <!-- Botón para abrir el modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalNuevaMateria">
+                    Crear nueva materia
+                </button>
             </div>
 
             <div class="card-body">
-                <table id="example" class="table table-bordered table-striped table-hover table-sm">
+                <table class="table table-bordered table-striped table-hover table-sm">
                     <thead>
                         <tr>
                             <th>Nro</th>
@@ -29,58 +29,54 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($niveles as $nivel)
+                        @foreach ($materias as $index => $materia)
                             <tr>
-                                <td>{{ $nivel->id }}</td>
-                                <td>{{ $nivel->nombre }}</td>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ strtoupper($materia->nombre) }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center">
-                                        @editButton(['module' => 'niveles'])
-                                            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
-                                                data-target="#ModalUpdate{{ $nivel->id }}">
-                                                <i class="fas fa-pencil-alt"></i> Editar
+                                        <!-- Botón Editar -->
+                                        <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
+                                            data-target="#modalEditarMateria{{ $materia->id }}">
+                                            <i class="fas fa-pencil-alt"></i> Editar
+                                        </button>
+
+                                        <!-- Formulario Eliminar -->
+                                        <form action="{{ route('materias.destroy', $materia->id) }}" method="POST" class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
                                             </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'niveles'])
-                                            <form action="{{ url('admin/niveles/' . $nivel->id) }}" method="POST" class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash-alt"></i> Eliminar
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'niveles'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </div>
 
-                                    <!-- Modal Editar Nivel -->
-                                    <div class="modal fade" id="ModalUpdate{{ $nivel->id }}" tabindex="-1" role="dialog"
-                                        aria-labelledby="ModalUpdateLabel" aria-hidden="true">
+                                    <!-- Modal Editar -->
+                                    <div class="modal fade" id="modalEditarMateria{{ $materia->id }}" tabindex="-1" role="dialog"
+                                        aria-labelledby="modalEditarMateriaLabel{{ $materia->id }}" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-header" style="background-color: #08a35b; color: white;">
-                                                    <h5 class="modal-title" id="ModalUpdateLabel">Editar nivel</h5>
+                                                    <h5 class="modal-title" id="modalEditarMateriaLabel{{ $materia->id }}">
+                                                        Editar materia
+                                                    </h5>
                                                     <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
 
-                                                <form action="{{ url('admin/niveles/' . $nivel->id) }}" method="POST">
+                                                <form action="{{ route('materias.update', $materia->id) }}" method="POST">
                                                     @csrf
                                                     @method('PUT')
                                                     <div class="modal-body">
                                                         <div class="form-group">
-                                                            <label for="nombre">Nombre del nivel <b>(*)</b></label>
+                                                            <label for="nombre">Nombre de la materia <b>(*)</b></label>
                                                             <div class="input-group">
                                                                 <div class="input-group-prepend">
-                                                                    <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                                                                    <span class="input-group-text"><i class="fas fa-book"></i></span>
                                                                 </div>
                                                                 <input type="text" class="form-control" name="nombre"
-                                                                    value="{{ old('nombre', $nivel->nombre) }}"
+                                                                    value="{{ old('nombre', $materia->nombre) }}"
                                                                     placeholder="Escribir aquí..." required>
                                                             </div>
                                                             @error('nombre')
@@ -94,7 +90,6 @@
                                                         <button type="submit" class="btn btn-success">Actualizar</button>
                                                     </div>
                                                 </form>
-
                                             </div>
                                         </div>
                                     </div>
@@ -108,26 +103,26 @@
     </div>
 </div>
 
-<!-- Modal Crear Nivel -->
-<div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
+<!-- Modal Crear Materia -->
+<div class="modal fade" id="modalNuevaMateria" tabindex="-1" role="dialog" aria-labelledby="modalNuevaMateriaLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
 
             <div class="modal-header" style="background-color: #007bff; color: white;">
-                <h5 class="modal-title" id="ModalCreateLabel">Registro de un nuevo nivel</h5>
+                <h5 class="modal-title" id="modalNuevaMateriaLabel">Registro de una nueva materia</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
-            <form action="{{ url('admin/niveles/create') }}" method="POST">
+            <form action="{{ route('admin.materias.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="nombre">Nombre del nivel <b>(*)</b></label>
+                        <label for="nombre">Nombre de la materia <b>(*)</b></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                                <span class="input-group-text"><i class="fas fa-book"></i></span>
                             </div>
                             <input type="text" class="form-control" name="nombre" value="{{ old('nombre') }}"
                                 placeholder="Escribir aquí..." required>
@@ -143,14 +138,13 @@
                     <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
 @stop
 
 @section('css')
-    {{-- Puedes agregar tus estilos personalizados aquí si los necesitas --}}
+    {{-- Agrega estilos personalizados si es necesario --}}
 @stop
 
 @section('js')
@@ -159,8 +153,8 @@
     @if ($errors->any())
         <script>
             $(document).ready(function () {
-                $('#ModalCreate').modal('show');
-            })
+                $('#modalNuevaMateria').modal('show');
+            });
         </script>
     @endif
 
@@ -188,6 +182,6 @@
     </script>
 
     <script>
-        console.log("Modal funcionando correctamente con Bootstrap 4 y AdminLTE.");
+        console.log("Modal de materias funcionando correctamente.");
     </script>
 @stop

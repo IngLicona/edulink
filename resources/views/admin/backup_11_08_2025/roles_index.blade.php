@@ -11,11 +11,11 @@
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title mb-0">Roles registrados</h3>
-                @can('admin.roles.create')
+                @createButton(['module' => 'roles'])
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
                     <i class="fas fa-plus"></i> Crear nuevo rol
                 </button>
-                @endcan
+                @endcreateButton
             </div>
             <div class="card-body">
                 <table id="example" class="table table-bordered table-striped table-hover table-sm">
@@ -32,20 +32,20 @@
                                 <td>{{ $role->id }}</td>
                                 <td>{{ $role->name }}</td>
                                 <td class="text-center">
-                                    @can('admin.roles.permisos')
+                                    @permisosButton(['module' => 'roles'])
                                     <a href="{{ route('admin.roles.permisos', $role->id) }}" class="btn btn-warning btn-sm">
                                         <i class="fas fa-key"></i> Permisos
                                     </a>
-                                    @endcan
+                                    @endpermisosButton
                                     
-                                    @can('admin.roles.edit')
+                                    @editButton(['module' => 'roles'])
                                     <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
                                         data-target="#ModalUpdate{{ $role->id }}">
                                         <i class="fas fa-pencil-alt"></i> Editar
                                     </button>
-                                    @endcan
+                                    @endeditButton
                                     
-                                    @can('admin.roles.delete')
+                                    @deleteButton(['module' => 'roles'])
                                     <form action="{{ route('admin.roles.destroy', $role->id) }}" method="POST"
                                         class="form-eliminar d-inline">
                                         @csrf
@@ -54,18 +54,17 @@
                                             <i class="fas fa-trash-alt"></i> Eliminar
                                         </button>
                                     </form>
-                                    @endcan
+                                    @enddeleteButton
                                     
-                                    @if(!auth()->user()->can('admin.roles.permisos') && 
-                                        !auth()->user()->can('admin.roles.edit') && 
-                                        !auth()->user()->can('admin.roles.delete'))
+                                    {{-- Mostrar mensaje si no tiene ningún permiso --}}
+                                    @noActions(['module' => 'roles'])
                                         <span class="text-muted small">Sin acciones disponibles</span>
-                                    @endif
+                                    @endnoActions
                                 </td>
                             </tr>
                             
                             {{-- Modal Editar - Solo crear el modal si tiene permisos de editar --}}
-                            @can('admin.roles.edit')
+                            @editButton(['module' => 'roles'])
                                 <div class="modal fade" id="ModalUpdate{{ $role->id }}" tabindex="-1" role="dialog"
                                     aria-labelledby="ModalUpdateLabel{{ $role->id }}" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
@@ -97,7 +96,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endcan
+                            @endeditButton
                         @empty
                             <tr>
                                 <td colspan="3" class="text-center">No hay roles registrados.</td>
@@ -111,7 +110,7 @@
 </div>
 
 {{-- Modal Crear - Solo mostrar si tiene permisos de crear --}}
-@can('admin.roles.create')
+@createButton(['module' => 'roles'])
     <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -139,7 +138,7 @@
             </div>
         </div>
     </div>
-@endcan
+@endcreateButton
 
 @stop
 

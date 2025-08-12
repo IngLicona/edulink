@@ -20,16 +20,15 @@
                     </select>
                     <span class="ml-2">Padres de Familia</span>
                 </div>
+                
                 <div class="d-flex align-items-center">
                     <label for="buscar" class="mr-2 mb-0">Buscador:</label>
                     <input type="text" id="buscar" class="form-control form-control-sm" style="width: 200px;">
                 </div>
 
-                @createButton(['module' => 'ppffs'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        Registrar nuevo PPFF
-                    </button>
-                @endcreateButton
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Registrar nuevo PPFF
+                </button>
             </div>
 
             <div class="card-body">
@@ -118,38 +117,210 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        @viewButton(['module' => 'ppffs'])
-                                            <button type="button" class="btn btn-info btn-sm mr-1" 
-                                                    data-toggle="modal" data-target="#ModalVer{{ $ppff->id }}" 
-                                                    title="Ver">
-                                                <i class="fas fa-eye"></i>
+                                        <!-- Botón Ver -->
+                                        <button type="button" class="btn btn-info btn-sm mr-1" 
+                                                data-toggle="modal" data-target="#ModalVer{{ $ppff->id }}" 
+                                                title="Ver">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        <!-- Botón Editar -->
+                                        <button type="button" class="btn btn-success btn-sm mr-1" 
+                                                data-toggle="modal" data-target="#ModalUpdate{{ $ppff->id }}" 
+                                                title="Editar">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+
+                                        <!-- Botón Eliminar -->
+                                        <form action="{{ route('admin.ppff.destroy', $ppff->id) }}" 
+                                              method="POST" class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
-                                        @endviewButton
-
-                                        @editButton(['module' => 'ppffs'])
-                                            <button type="button" class="btn btn-success btn-sm mr-1" 
-                                                    data-toggle="modal" data-target="#ModalUpdate{{ $ppff->id }}" 
-                                                    title="Editar">
-                                                <i class="fas fa-pencil-alt"></i>
-                                            </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'ppffs'])
-                                            <form action="{{ route('admin.ppff.destroy', $ppff->id) }}" 
-                                                  method="POST" class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'ppffs'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </td>
                                 </tr>
+
+                                <!-- Modal Ver -->
+                                <div class="modal fade" id="ModalVer{{ $ppff->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalVerLabel{{ $ppff->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title" id="ModalVerLabel{{ $ppff->id }}">Información del PPFF</h5>
+                                                <button type="button" class="close text-white" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="card card-outline card-info">
+                                                            <div class="card-header">
+                                                                <h6 class="mb-0"><i class="fas fa-user mr-2"></i>Datos Personales</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <p><strong>Nombres:</strong> {{ $ppff->nombre }}</p>
+                                                                <p><strong>Apellidos:</strong> {{ $ppff->paterno }} {{ $ppff->materno }}</p>
+                                                                <p><strong>CI:</strong> {{ $ppff->ci }}</p>
+                                                                <p><strong>Fecha de Nacimiento:</strong> {{ $ppff->fecha_nacimiento ? $ppff->fecha_nacimiento->format('d/m/Y') : 'No registrada' }}</p>
+                                                                <p><strong>Edad:</strong> 
+                                                                    @if($ppff->fecha_nacimiento)
+                                                                        {{ $ppff->edad }} años
+                                                                    @else
+                                                                        No calculable
+                                                                    @endif
+                                                                </p>
+                                                                <p><strong>Teléfono:</strong> {{ $ppff->telefono }}</p>
+                                                                <p><strong>Parentesco:</strong> <span class="badge badge-info">{{ ucfirst($ppff->parentesco) }}</span></p>
+                                                                <p><strong>Ocupación:</strong> {{ $ppff->ocupacion ?? 'No especificada' }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="card card-outline card-success">
+                                                            <div class="card-header">
+                                                                <h6 class="mb-0"><i class="fas fa-users mr-2"></i>Estudiantes a cargo</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                @if($ppff->estudiantes->count() > 0)
+                                                                    @foreach($ppff->estudiantes as $estudiante)
+                                                                        <div class="mb-2 p-2 border rounded">
+                                                                            <p class="mb-1"><strong>{{ $estudiante->nombre_completo }}</strong></p>
+                                                                            <p class="mb-0 text-muted"><small>CI: {{ $estudiante->ci }}</small></p>
+                                                                        </div>
+                                                                    @endforeach
+                                                                @else
+                                                                    <p class="text-muted">No tiene estudiantes asociados</p>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                @if($ppff->direccion)
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="card card-outline card-warning">
+                                                            <div class="card-header">
+                                                                <h6 class="mb-0"><i class="fas fa-map-marker-alt mr-2"></i>Dirección</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <p class="mb-0">{{ $ppff->direccion }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Editar -->
+                                <div class="modal fade" id="ModalUpdate{{ $ppff->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalUpdateLabel{{ $ppff->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-success text-white">
+                                                <h5 class="modal-title" id="ModalUpdateLabel{{ $ppff->id }}">Editar PPFF</h5>
+                                                <button type="button" class="close text-white" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+
+                                            <form action="{{ route('admin.ppff.update', $ppff->id) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Nombres *</label>
+                                                                <input type="text" name="nombre" class="form-control" value="{{ $ppff->nombre }}" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Apellido Paterno *</label>
+                                                                <input type="text" name="paterno" class="form-control" value="{{ $ppff->paterno }}" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Apellido Materno</label>
+                                                                <input type="text" name="materno" class="form-control" value="{{ $ppff->materno }}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>CI (Cédula de Identidad) *</label>
+                                                                <input type="text" name="ci" class="form-control" value="{{ $ppff->ci }}" required placeholder="Ingrese CI">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Fecha de Nacimiento</label>
+                                                                <input type="date" name="fecha_nacimiento" class="form-control" value="{{ $ppff->fecha_nacimiento ? $ppff->fecha_nacimiento->format('Y-m-d') : '' }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Teléfono *</label>
+                                                                <input type="text" name="telefono" class="form-control" value="{{ $ppff->telefono }}" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Parentesco *</label>
+                                                                <select name="parentesco" class="form-control" required>
+                                                                    <option value="">Seleccione parentesco</option>
+                                                                    <option value="padre" {{ $ppff->parentesco == 'padre' ? 'selected' : '' }}>Padre</option>
+                                                                    <option value="madre" {{ $ppff->parentesco == 'madre' ? 'selected' : '' }}>Madre</option>
+                                                                    <option value="tutor" {{ $ppff->parentesco == 'tutor' ? 'selected' : '' }}>Tutor</option>
+                                                                    <option value="abuelo" {{ $ppff->parentesco == 'abuelo' ? 'selected' : '' }}>Abuelo</option>
+                                                                    <option value="abuela" {{ $ppff->parentesco == 'abuela' ? 'selected' : '' }}>Abuela</option>
+                                                                    <option value="tio" {{ $ppff->parentesco == 'tio' ? 'selected' : '' }}>Tío</option>
+                                                                    <option value="tia" {{ $ppff->parentesco == 'tia' ? 'selected' : '' }}>Tía</option>
+                                                                    <option value="hermano" {{ $ppff->parentesco == 'hermano' ? 'selected' : '' }}>Hermano</option>
+                                                                    <option value="hermana" {{ $ppff->parentesco == 'hermana' ? 'selected' : '' }}>Hermana</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Ocupación</label>
+                                                                <input type="text" name="ocupacion" class="form-control" value="{{ $ppff->ocupacion }}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Dirección</label>
+                                                                <textarea name="direccion" class="form-control" rows="3">{{ $ppff->direccion }}</textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-success">Actualizar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             @empty
                                 <tr>
                                     <td colspan="9" class="text-center">
@@ -165,192 +336,7 @@
     </div>
 </div>
 
-<!-- Modales para cada PPFF -->
-@foreach($ppffs as $ppff)
-    @modalView(['module' => 'ppffs'])
-    <div class="modal fade" id="ModalVer{{ $ppff->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalVerLabel{{ $ppff->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title" id="ModalVerLabel{{ $ppff->id }}">Información del PPFF</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card card-outline card-info">
-                                <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-user mr-2"></i>Datos Personales</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Nombres:</strong> {{ $ppff->nombre }}</p>
-                                    <p><strong>Apellidos:</strong> {{ $ppff->paterno }} {{ $ppff->materno }}</p>
-                                    <p><strong>CI:</strong> {{ $ppff->ci }}</p>
-                                    <p><strong>Fecha de Nacimiento:</strong> {{ $ppff->fecha_nacimiento ? $ppff->fecha_nacimiento->format('d/m/Y') : 'No registrada' }}</p>
-                                    <p><strong>Edad:</strong> 
-                                        @if($ppff->fecha_nacimiento)
-                                            {{ $ppff->edad }} años
-                                        @else
-                                            No calculable
-                                        @endif
-                                    </p>
-                                    <p><strong>Teléfono:</strong> {{ $ppff->telefono }}</p>
-                                    <p><strong>Parentesco:</strong> <span class="badge badge-info">{{ ucfirst($ppff->parentesco) }}</span></p>
-                                    <p><strong>Ocupación:</strong> {{ $ppff->ocupacion ?? 'No especificada' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card card-outline card-success">
-                                <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-users mr-2"></i>Estudiantes a cargo</h6>
-                                </div>
-                                <div class="card-body">
-                                    @if($ppff->estudiantes->count() > 0)
-                                        @foreach($ppff->estudiantes as $estudiante)
-                                            <div class="mb-2 p-2 border rounded">
-                                                <p class="mb-1"><strong>{{ $estudiante->nombre_completo }}</strong></p>
-                                                <p class="mb-0 text-muted"><small>CI: {{ $estudiante->ci }}</small></p>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <p class="text-muted">No tiene estudiantes asociados</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    @if($ppff->direccion)
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card card-outline card-warning">
-                                <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-map-marker-alt mr-2"></i>Dirección</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p class="mb-0">{{ $ppff->direccion }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endmodalView
-
-    @modalEdit(['module' => 'ppffs'])
-    <div class="modal fade" id="ModalUpdate{{ $ppff->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalUpdateLabel{{ $ppff->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="ModalUpdateLabel{{ $ppff->id }}">Editar PPFF</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-
-                <form action="{{ route('admin.ppff.update', $ppff->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Nombres *</label>
-                                    <input type="text" name="nombre" class="form-control" value="{{ $ppff->nombre }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Apellido Paterno *</label>
-                                    <input type="text" name="paterno" class="form-control" value="{{ $ppff->paterno }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Apellido Materno</label>
-                                    <input type="text" name="materno" class="form-control" value="{{ $ppff->materno }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>CI (Cédula de Identidad) *</label>
-                                    <input type="text" name="ci" class="form-control" value="{{ $ppff->ci }}" required placeholder="Ingrese CI">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Fecha de Nacimiento</label>
-                                    <input type="date" name="fecha_nacimiento" class="form-control" value="{{ $ppff->fecha_nacimiento ? $ppff->fecha_nacimiento->format('Y-m-d') : '' }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Teléfono *</label>
-                                    <input type="text" name="telefono" class="form-control" value="{{ $ppff->telefono }}" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Parentesco *</label>
-                                    <select name="parentesco" class="form-control" required>
-                                        <option value="">Seleccione parentesco</option>
-                                        <option value="padre" {{ $ppff->parentesco == 'padre' ? 'selected' : '' }}>Padre</option>
-                                        <option value="madre" {{ $ppff->parentesco == 'madre' ? 'selected' : '' }}>Madre</option>
-                                        <option value="tutor" {{ $ppff->parentesco == 'tutor' ? 'selected' : '' }}>Tutor</option>
-                                        <option value="abuelo" {{ $ppff->parentesco == 'abuelo' ? 'selected' : '' }}>Abuelo</option>
-                                        <option value="abuela" {{ $ppff->parentesco == 'abuela' ? 'selected' : '' }}>Abuela</option>
-                                        <option value="tio" {{ $ppff->parentesco == 'tio' ? 'selected' : '' }}>Tío</option>
-                                        <option value="tia" {{ $ppff->parentesco == 'tia' ? 'selected' : '' }}>Tía</option>
-                                        <option value="hermano" {{ $ppff->parentesco == 'hermano' ? 'selected' : '' }}>Hermano</option>
-                                        <option value="hermana" {{ $ppff->parentesco == 'hermana' ? 'selected' : '' }}>Hermana</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Ocupación</label>
-                                    <input type="text" name="ocupacion" class="form-control" value="{{ $ppff->ocupacion }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Dirección</label>
-                                    <textarea name="direccion" class="form-control" rows="3">{{ $ppff->direccion }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Actualizar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    @endmodalEdit
-@endforeach
-
-<!-- Modal de Creación -->
-@modalCreate(['module' => 'ppffs'])
+<!-- Modal Crear -->
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -481,7 +467,6 @@
         </div>
     </div>
 </div>
-@endmodalCreate
 @stop
 
 @section('css')
@@ -533,11 +518,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    @showModalOnErrors(['module' => 'ppffs'])
+    @if ($errors->any())
         $(document).ready(function () {
             $('#ModalCreate').modal('show');
         });
-    @endshowModalOnErrors
+    @endif
 
     $(document).ready(function() {
         // Verificar si hay datos para la tabla

@@ -16,7 +16,6 @@
                 </div>
 
                 <div class="card-body">
-                    @editButton(['module' => 'configuracion'])
                     <form action="{{url('/admin/configuracion/create')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
@@ -198,14 +197,6 @@
                                     </div>
                             </div>
                     </form>
-                    @endeditButton
-
-                    @noActions(['module' => 'configuracion'])
-                        <div class="text-center">
-                            <span class="text-muted">No tienes permisos para editar la configuración</span>
-                            <a href="{{ url('/admin')}}" class="btn btn-default"><i class="fas fa-arrow-left"></i>Volver</a>
-                        </div>
-                    @endnoActions
                 </div>
             </div>
         </div>

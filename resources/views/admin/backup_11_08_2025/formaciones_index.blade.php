@@ -3,11 +3,7 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Formaciones de {{ $personal->nombre_completo }}</h1>
-        <a href="{{ route('admin.personal.index') }}" clas                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endmodalEdittn btn-secondary">
+        <a href="{{ route('admin.personal.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver al Personal
         </a>
     </div>
@@ -76,11 +72,9 @@
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="fas fa-graduation-cap mr-2"></i>Formaciones Académicas</h6>
-                @createButton(['module' => 'formaciones'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        <i class="fas fa-plus mr-1"></i>Registrar Nueva Formación
-                    </button>
-                @endcreateButton
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    <i class="fas fa-plus mr-1"></i>Registrar Nueva Formación
+                </button>
             </div>
 
             <div class="card-body">
@@ -149,32 +143,26 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        @editButton(['module' => 'formaciones'])
-                                            <button type="button" class="btn btn-success btn-sm mr-1" 
-                                                    data-toggle="modal" data-target="#ModalEdit{{ $formacion->id }}" 
-                                                    title="Editar">
-                                                <i class="fas fa-pencil-alt"></i>
+                                        <!-- Botón Editar -->
+                                        <button type="button" class="btn btn-success btn-sm mr-1" 
+                                                data-toggle="modal" data-target="#ModalEdit{{ $formacion->id }}" 
+                                                title="Editar">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+
+                                        <!-- Botón Eliminar -->
+                                        <form action="{{ route('admin.formacion.destroy', $formacion->id) }}" 
+                                              method="POST" class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'formaciones'])
-                                            <form action="{{ route('admin.formacion.destroy', $formacion->id) }}" 
-                                                  method="POST" class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'formaciones'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </td>
                                 </tr>
 
-                                @modalEdit(['module' => 'formaciones'])
+                                <!-- Modal Editar -->
                                 <div class="modal fade" id="ModalEdit{{ $formacion->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalEditLabel{{ $formacion->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg" role="document">
                                         <div class="modal-content">
@@ -266,7 +254,7 @@
     </div>
 </div>
 
-@modalCreate(['module' => 'formaciones'])
+<!-- Modal Crear -->
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -341,7 +329,6 @@
         </div>
     </div>
 </div>
-@endmodalCreate
 @stop
 
 @section('css')
@@ -376,11 +363,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    @showModalOnErrors(['module' => 'formaciones'])
+    @if ($errors->any())
         $(document).ready(function () {
             $('#ModalCreate').modal('show');
         });
-    @endshowModalOnErrors
+    @endif
 
     $(document).ready(function() {
         // Verificar si hay datos en la tabla

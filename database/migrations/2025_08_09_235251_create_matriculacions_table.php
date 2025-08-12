@@ -42,8 +42,15 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
+        // Deshabilita la verificación de claves foráneas
+        Schema::disableForeignKeyConstraints();
+
+        // Borra la tabla
         Schema::dropIfExists('matriculacions');
+
+        // Vuelve a habilitar la verificación de claves foráneas
+        Schema::enableForeignKeyConstraints();
     }
 };

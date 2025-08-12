@@ -11,11 +11,9 @@
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title mb-0">Grados registrados</h3>
-                @createButton(['module' => 'grados'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        Crear nuevo grado
-                    </button>
-                @endcreateButton
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Crear nuevo grado
+                </button>
             </div>
 
             <div class="card-body">
@@ -41,30 +39,22 @@
                                         <td>{{ $grado->nombre }}</td>
                                         <td>{{ $nivel->nombre }}</td>
                                         <td class="text-center">
-                                            @editButton(['module' => 'grados'])
-                                                <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
-                                                    data-target="#ModalUpdate{{ $grado->id }}">
-                                                    <i class="fas fa-pencil-alt"></i> Editar
+                                            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
+                                                data-target="#ModalUpdate{{ $grado->id }}">
+                                                <i class="fas fa-pencil-alt"></i> Editar
+                                            </button>
+
+                                            <form action="{{ url('admin/grados/' . $grado->id) }}" method="POST" class="form-eliminar d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash-alt"></i> Eliminar
                                                 </button>
-                                            @endeditButton
-
-                                            @deleteButton(['module' => 'grados'])
-                                                <form action="{{ url('admin/grados/' . $grado->id) }}" method="POST" class="form-eliminar d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        <i class="fas fa-trash-alt"></i> Eliminar
-                                                    </button>
-                                                </form>
-                                            @enddeleteButton
-
-                                            @noActions(['module' => 'grados'])
-                                                <span class="text-muted small">Sin acciones disponibles</span>
-                                            @endnoActions
+                                            </form>
                                         </td>
                                     </tr>
 
-                                    @modalEdit(['module' => 'grados'])
+                                    <!-- Modal Editar -->
                                     <div class="modal fade" id="ModalUpdate{{ $grado->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalUpdateLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
                                             <div class="modal-content">
@@ -102,7 +92,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @endmodalEdit
                                 @empty
                                     <tr>
                                         <td colspan="4" class="text-center">No hay grados registrados para este nivel.</td>
@@ -122,7 +111,7 @@
 </div>
 
 <!-- Modal Crear -->
-@modalCreate(['module' => 'grados'])
+<!-- Modal Crear -->
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -164,7 +153,6 @@
         </div>
     </div>
 </div>
-@endmodalCreate
 @stop
 
 @section('css')
@@ -173,13 +161,13 @@
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@showModalOnErrors(['module' => 'grados'])
+@if ($errors->any())
     <script>
         $(document).ready(function () {
             $('#ModalCreate').modal('show');
         })
     </script>
-@endshowModalOnErrors
+@endif
 
 @if(session('mensaje'))
 <script>

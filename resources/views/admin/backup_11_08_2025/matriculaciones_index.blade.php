@@ -26,11 +26,9 @@
                     <input type="text" id="buscar" class="form-control form-control-sm" style="width: 200px;">
                 </div>
 
-                @createButton(['module' => 'matriculaciones'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        Nueva Matriculación
-                    </button>
-                @endcreateButton
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Nueva Matriculación
+                </button>
             </div>
 
             <div class="card-body">
@@ -136,38 +134,252 @@
                                             <i class="fas fa-file-contract"></i> Matrícula
                                         </a>
 
-                                        @viewButton(['module' => 'matriculaciones'])
-                                            <button type="button" class="btn btn-info btn-sm mr-1" 
-                                                    data-toggle="modal" data-target="#ModalVer{{ $matriculacion->id }}" 
-                                                    title="Ver">
-                                                <i class="fas fa-eye"></i>
+                                        <!-- Botón Ver -->
+                                        <button type="button" class="btn btn-info btn-sm mr-1" 
+                                                data-toggle="modal" data-target="#ModalVer{{ $matriculacion->id }}" 
+                                                title="Ver">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        <!-- Botón Editar -->
+                                        <button type="button" class="btn btn-success btn-sm mr-1" 
+                                                data-toggle="modal" data-target="#ModalUpdate{{ $matriculacion->id }}" 
+                                                title="Editar">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+
+                                        <!-- Botón Eliminar -->
+                                        <form action="{{ route('admin.matriculaciones.destroy', $matriculacion->id) }}" 
+                                              method="POST" class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
-                                        @endviewButton
-
-                                        @editButton(['module' => 'matriculaciones'])
-                                            <button type="button" class="btn btn-success btn-sm mr-1" 
-                                                    data-toggle="modal" data-target="#ModalUpdate{{ $matriculacion->id }}" 
-                                                    title="Editar">
-                                                <i class="fas fa-pencil-alt"></i>
-                                            </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'matriculaciones'])
-                                            <form action="{{ route('admin.matriculaciones.destroy', $matriculacion->id) }}" 
-                                                  method="POST" class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'matriculaciones'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </td>
                                 </tr>
+
+                                <!-- Modal Ver -->
+                                <div class="modal fade" id="ModalVer{{ $matriculacion->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalVerLabel{{ $matriculacion->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-xl" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title" id="ModalVerLabel{{ $matriculacion->id }}">Información de la Matriculación</h5>
+                                                <button type="button" class="close text-white" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="card card-outline card-info">
+                                                            <div class="card-header">
+                                                                <h6 class="mb-0"><i class="fas fa-user-graduate mr-2"></i>Datos del Estudiante</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <p><strong>Nombre Completo:</strong> {{ $matriculacion->estudiante->nombre_completo }}</p>
+                                                                <p><strong>CI:</strong> {{ $matriculacion->estudiante->ci }}</p>
+                                                                <p><strong>Fecha de Nacimiento:</strong> {{ $matriculacion->estudiante->fecha_nacimiento ? $matriculacion->estudiante->fecha_nacimiento->format('d/m/Y') : 'No registrada' }}</p>
+                                                                <p><strong>Género:</strong> {{ ucfirst($matriculacion->estudiante->genero) }}</p>
+                                                                <p><strong>Teléfono:</strong> {{ $matriculacion->estudiante->telefono }}</p>
+                                                                <p><strong>Estado:</strong> 
+                                                                    @if($matriculacion->estudiante->estado == 'activo')
+                                                                        <span class="badge badge-success">ACTIVO</span>
+                                                                    @else
+                                                                        <span class="badge badge-danger">INACTIVO</span>
+                                                                    @endif
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="card card-outline card-warning">
+                                                            <div class="card-header">
+                                                                <h6 class="mb-0"><i class="fas fa-users mr-2"></i>Datos del PPFF</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                @if($matriculacion->estudiante->ppff)
+                                                                    <p><strong>Nombre Completo:</strong> {{ $matriculacion->estudiante->ppff->nombre_completo }}</p>
+                                                                    <p><strong>CI:</strong> {{ $matriculacion->estudiante->ppff->ci }}</p>
+                                                                    <p><strong>Parentesco:</strong> {{ ucfirst($matriculacion->estudiante->ppff->parentesco) }}</p>
+                                                                    <p><strong>Ocupación:</strong> {{ $matriculacion->estudiante->ppff->ocupacion }}</p>
+                                                                    <p><strong>Teléfono:</strong> {{ $matriculacion->estudiante->ppff->telefono }}</p>
+                                                                @else
+                                                                    <p class="text-muted">Sin información de PPFF registrada</p>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="card card-outline card-success">
+                                                            <div class="card-header">
+                                                                <h6 class="mb-0"><i class="fas fa-graduation-cap mr-2"></i>Información Académica</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <p><strong>Gestión:</strong> <span class="badge badge-primary">{{ $matriculacion->gestion->nombre }}</span></p>
+                                                                        <p><strong>Nivel:</strong> {{ $matriculacion->nivel->nombre }}</p>
+                                                                        <p><strong>Grado:</strong> {{ $matriculacion->grado->nombre }}</p>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <p><strong>Paralelo:</strong> {{ $matriculacion->paralelo->nombre }}</p>
+                                                                        <p><strong>Turno:</strong> <span class="badge badge-info">{{ $matriculacion->turno->nombre }}</span></p>
+                                                                        <p><strong>Fecha de Matriculación:</strong> {{ $matriculacion->fecha_matriculacion->format('d/m/Y') }}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="{{ route('admin.matriculaciones.pdf', $matriculacion->id) }}" 
+                                                   class="btn btn-warning" target="_blank">
+                                                    <i class="fas fa-file-contract"></i> Descargar Matrícula
+                                                </a>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Editar -->
+                                <div class="modal fade" id="ModalUpdate{{ $matriculacion->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalUpdateLabel{{ $matriculacion->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-success text-white">
+                                                <h5 class="modal-title" id="ModalUpdateLabel{{ $matriculacion->id }}">Editar Matriculación</h5>
+                                                <button type="button" class="close text-white" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+
+                                            <form action="{{ route('admin.matriculaciones.update', $matriculacion->id) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Estudiante *</label>
+                                                                <select name="estudiante_id" class="form-control" required>
+                                                                    @foreach($estudiantes as $estudiante)
+                                                                        <option value="{{ $estudiante->id }}" {{ $matriculacion->estudiante_id == $estudiante->id ? 'selected' : '' }}>
+                                                                            {{ $estudiante->nombre_completo }} - CI: {{ $estudiante->ci }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Estado *</label>
+                                                                <select name="estado" class="form-control" required>
+                                                                    <option value="activo" {{ $matriculacion->estado == 'activo' ? 'selected' : '' }}>Activo</option>
+                                                                    <option value="inactivo" {{ $matriculacion->estado == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Gestión *</label>
+                                                                <select name="gestion_id" class="form-control gestion-select" required>
+                                                                    <option value="">Seleccione una gestión</option>
+                                                                    @foreach($gestiones as $gestion)
+                                                                        <option value="{{ $gestion->id }}" {{ $matriculacion->gestion_id == $gestion->id ? 'selected' : '' }}>
+                                                                            {{ $gestion->nombre }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Turno *</label>
+                                                                <select name="turno_id" class="form-control" required>
+                                                                    <option value="">Seleccione un turno</option>
+                                                                    @foreach($turnos as $turno)
+                                                                        <option value="{{ $turno->id }}" {{ $matriculacion->turno_id == $turno->id ? 'selected' : '' }}>
+                                                                            {{ $turno->nombre }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Nivel *</label>
+                                                                <select name="nivel_id" class="form-control nivel-select" required>
+                                                                    <option value="">Seleccione un nivel</option>
+                                                                    @foreach($niveles as $nivel)
+                                                                        <option value="{{ $nivel->id }}" {{ $matriculacion->nivel_id == $nivel->id ? 'selected' : '' }}>
+                                                                            {{ $nivel->nombre }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Grado *</label>
+                                                                <select name="grado_id" class="form-control grado-select" required>
+                                                                    <option value="">Seleccione un grado</option>
+                                                                    @foreach($grados as $grado)
+                                                                        @if($grado->nivel_id == $matriculacion->nivel_id)
+                                                                            <option value="{{ $grado->id }}" {{ $matriculacion->grado_id == $grado->id ? 'selected' : '' }}>
+                                                                                {{ $grado->nombre }}
+                                                                            </option>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Paralelo *</label>
+                                                                <select name="paralelo_id" class="form-control paralelo-select" required>
+                                                                    <option value="">Seleccione un paralelo</option>
+                                                                    @foreach($paralelos as $paralelo)
+                                                                        @if($paralelo->grado_id == $matriculacion->grado_id)
+                                                                            <option value="{{ $paralelo->id }}" {{ $matriculacion->paralelo_id == $paralelo->id ? 'selected' : '' }}>
+                                                                                {{ $paralelo->nombre }}
+                                                                            </option>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label>Fecha de Matriculación *</label>
+                                                                <input type="date" name="fecha_matriculacion" class="form-control" 
+                                                                       value="{{ $matriculacion->fecha_matriculacion->format('Y-m-d') }}" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-success">Actualizar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             @empty
                                 <tr>
                                     <td colspan="12" class="text-center">
@@ -183,231 +395,7 @@
     </div>
 </div>
 
-<!-- Modales para cada Matriculación -->
-@foreach($matriculaciones as $matriculacion)
-    <!-- Modal Ver -->
-    <div class="modal fade" id="ModalVer{{ $matriculacion->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalVerLabel{{ $matriculacion->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title" id="ModalVerLabel{{ $matriculacion->id }}">Información de la Matriculación</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card card-outline card-info">
-                                <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-user-graduate mr-2"></i>Datos del Estudiante</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Nombre Completo:</strong> {{ $matriculacion->estudiante->nombre_completo }}</p>
-                                    <p><strong>CI:</strong> {{ $matriculacion->estudiante->ci }}</p>
-                                    <p><strong>Fecha de Nacimiento:</strong> {{ $matriculacion->estudiante->fecha_nacimiento ? $matriculacion->estudiante->fecha_nacimiento->format('d/m/Y') : 'No registrada' }}</p>
-                                    <p><strong>Género:</strong> {{ ucfirst($matriculacion->estudiante->genero) }}</p>
-                                    <p><strong>Teléfono:</strong> {{ $matriculacion->estudiante->telefono }}</p>
-                                    <p><strong>Estado:</strong> 
-                                        @if($matriculacion->estudiante->estado == 'activo')
-                                            <span class="badge badge-success">ACTIVO</span>
-                                        @else
-                                            <span class="badge badge-danger">INACTIVO</span>
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card card-outline card-warning">
-                                <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-users mr-2"></i>Datos del PPFF</h6>
-                                </div>
-                                <div class="card-body">
-                                    @if($matriculacion->estudiante->ppff)
-                                        <p><strong>Nombre Completo:</strong> {{ $matriculacion->estudiante->ppff->nombre_completo }}</p>
-                                        <p><strong>CI:</strong> {{ $matriculacion->estudiante->ppff->ci }}</p>
-                                        <p><strong>Parentesco:</strong> {{ ucfirst($matriculacion->estudiante->ppff->parentesco) }}</p>
-                                        <p><strong>Ocupación:</strong> {{ $matriculacion->estudiante->ppff->ocupacion }}</p>
-                                        <p><strong>Teléfono:</strong> {{ $matriculacion->estudiante->ppff->telefono }}</p>
-                                    @else
-                                        <p class="text-muted">Sin información de PPFF registrada</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card card-outline card-success">
-                                <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-graduation-cap mr-2"></i>Información Académica</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p><strong>Gestión:</strong> <span class="badge badge-primary">{{ $matriculacion->gestion->nombre }}</span></p>
-                                            <p><strong>Nivel:</strong> {{ $matriculacion->nivel->nombre }}</p>
-                                            <p><strong>Grado:</strong> {{ $matriculacion->grado->nombre }}</p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p><strong>Paralelo:</strong> {{ $matriculacion->paralelo->nombre }}</p>
-                                            <p><strong>Turno:</strong> <span class="badge badge-info">{{ $matriculacion->turno->nombre }}</span></p>
-                                            <p><strong>Fecha de Matriculación:</strong> {{ $matriculacion->fecha_matriculacion->format('d/m/Y') }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a href="{{ route('admin.matriculaciones.pdf', $matriculacion->id) }}" 
-                       class="btn btn-warning" target="_blank">
-                        <i class="fas fa-file-contract"></i> Descargar Matrícula
-                    </a>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Editar -->
-    <div class="modal fade" id="ModalUpdate{{ $matriculacion->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalUpdateLabel{{ $matriculacion->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="ModalUpdateLabel{{ $matriculacion->id }}">Editar Matriculación</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-
-                <form action="{{ route('admin.matriculaciones.update', $matriculacion->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Estudiante *</label>
-                                    <select name="estudiante_id" class="form-control" required>
-                                        @foreach($estudiantes as $estudiante)
-                                            <option value="{{ $estudiante->id }}" {{ $matriculacion->estudiante_id == $estudiante->id ? 'selected' : '' }}>
-                                                {{ $estudiante->nombre_completo }} - CI: {{ $estudiante->ci }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Estado *</label>
-                                    <select name="estado" class="form-control" required>
-                                        <option value="activo" {{ $matriculacion->estado == 'activo' ? 'selected' : '' }}>Activo</option>
-                                        <option value="inactivo" {{ $matriculacion->estado == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Gestión *</label>
-                                    <select name="gestion_id" class="form-control gestion-select" required>
-                                        <option value="">Seleccione una gestión</option>
-                                        @foreach($gestiones as $gestion)
-                                            <option value="{{ $gestion->id }}" {{ $matriculacion->gestion_id == $gestion->id ? 'selected' : '' }}>
-                                                {{ $gestion->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Turno *</label>
-                                    <select name="turno_id" class="form-control" required>
-                                        <option value="">Seleccione un turno</option>
-                                        @foreach($turnos as $turno)
-                                            <option value="{{ $turno->id }}" {{ $matriculacion->turno_id == $turno->id ? 'selected' : '' }}>
-                                                {{ $turno->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Nivel *</label>
-                                    <select name="nivel_id" class="form-control nivel-select" required>
-                                        <option value="">Seleccione un nivel</option>
-                                        @foreach($niveles as $nivel)
-                                            <option value="{{ $nivel->id }}" {{ $matriculacion->nivel_id == $nivel->id ? 'selected' : '' }}>
-                                                {{ $nivel->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Grado *</label>
-                                    <select name="grado_id" class="form-control grado-select" required>
-                                        <option value="">Seleccione un grado</option>
-                                        @foreach($grados as $grado)
-                                            @if($grado->nivel_id == $matriculacion->nivel_id)
-                                                <option value="{{ $grado->id }}" {{ $matriculacion->grado_id == $grado->id ? 'selected' : '' }}>
-                                                    {{ $grado->nombre }}
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Paralelo *</label>
-                                    <select name="paralelo_id" class="form-control paralelo-select" required>
-                                        <option value="">Seleccione un paralelo</option>
-                                        @foreach($paralelos as $paralelo)
-                                            @if($paralelo->grado_id == $matriculacion->grado_id)
-                                                <option value="{{ $paralelo->id }}" {{ $matriculacion->paralelo_id == $paralelo->id ? 'selected' : '' }}>
-                                                    {{ $paralelo->nombre }}
-                                                </option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>Fecha de Matriculación *</label>
-                                    <input type="date" name="fecha_matriculacion" class="form-control" 
-                                           value="{{ $matriculacion->fecha_matriculacion->format('Y-m-d') }}" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Actualizar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-@endforeach
-
-<!-- Modal de Creación -->
+<!-- Modal Crear -->
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -608,7 +596,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    @if($errors->any())
+    @if ($errors->any())
         $(document).ready(function () {
             $('#ModalCreate').modal('show');
         });

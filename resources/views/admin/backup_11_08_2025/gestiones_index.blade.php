@@ -3,12 +3,8 @@
 
 @section('content_header')
     <h1><b>Listado de gestiones educativas</b></h1>
-    <hr>
-    @createButton(['module' => 'gestiones'])
-        <a href="{{url('admin/gestiones/create')}}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Crear nueva gestión
-        </a>
-    @endcreateButton
+     <hr>
+    <a href="{{url('admin/gestiones/create')}}" class="btn btn-primary">Crear nueva gestion</a>
    
 @stop
 
@@ -22,25 +18,15 @@
                         <span class="info-box-text"><b>Gestiones educativa</b></span>
                         <span class="info-box-number" style="color: rgb(0, 94, 255):font size:16p"><b>{{$gestion->nombre}}</b></span>
                         <div class="row">
-                            @editButton(['module' => 'gestiones'])
-                                <a href="{{url('admin/gestiones/'.$gestion->id.'/edit')}}" class="btn btn-success btn-sm">
-                                    <i class="fas fa-pencil-alt"></i> Editar
-                                </a>
-                            @endeditButton
+                            <a href="{{url('admin/gestiones/'.$gestion->id.'/edit')}}" class="btn btn-success btn-sm"><i class="fas fa-pencil-alt"></i>Editar</a>
 
-                            @deleteButton(['module' => 'gestiones'])
-                                <form action="{{url('/admin/gestiones/'.$gestion->id)}}" method="post" id="miFormulario{{$gestion->id}}" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" onclick="preguntar{{$gestion->id}}(event)">
-                                        <i class="fas fa-trash-alt"></i> Eliminar
-                                    </button>
-                                </form>
-                            @enddeleteButton
-
-                            @noActions(['module' => 'gestiones'])
-                                <span class="text-muted small">Sin acciones disponibles</span>
-                            @endnoActions
+                        <form action="{{url('/admin/gestiones/'.$gestion->id)}}" method="post" id="miFormulario{{$gestion->id}}">
+                            @csrf
+                            @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="preguntar{{$gestion->id}}(event)">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
 
                             <script>
                                 function preguntar{{$gestion->id}}(event) {

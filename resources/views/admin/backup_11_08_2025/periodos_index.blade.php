@@ -46,7 +46,6 @@
                                                 <i class="fas fa-pencil-alt"></i> Editar
                                             </button>
                                         @endeditButton
-
                                         @deleteButton(['module' => 'periodos'])
                                             <form action="{{ url('admin/periodos/' . $periodo->id) }}" method="POST" class="form-eliminar d-inline">
                                                 @csrf
@@ -56,7 +55,6 @@
                                                 </button>
                                             </form>
                                         @enddeleteButton
-
                                         @noActions(['module' => 'periodos'])
                                             <span class="text-muted small">Sin acciones disponibles</span>
                                         @endnoActions

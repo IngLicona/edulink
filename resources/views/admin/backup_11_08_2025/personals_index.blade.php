@@ -26,11 +26,9 @@
                     <input type="text" id="buscar" class="form-control form-control-sm" style="width: 200px;">
                 </div>
 
-                @can('admin.personal.create')
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        <i class="fas fa-plus"></i> Crear nuevo personal
-                    </button>
-                @endcan
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Crear nuevo personal
+                </button>
             </div>
 
             <div class="card-body">
@@ -121,28 +119,26 @@
                                     <td class="text-center">
                                         <!-- Botón Formaciones -->
                                         <a href="{{ route('admin.formacion.index', $personal->id) }}" 
-                                           class="btn btn-warning btn-sm mr-1" 
-                                           title="Formaciones">
-                                            <i class="fas fa-graduation-cap"></i>
-                                        </a>
+   class="btn btn-warning btn-sm mr-1" 
+   title="Formaciones">
+    <i class="fas fa-graduation-cap"></i>
+</a>
                                         
-                                        @can('admin.personal.index')
+                                        <!-- Botón Ver -->
                                         <button type="button" class="btn btn-info btn-sm mr-1" 
                                                 data-toggle="modal" data-target="#ModalVer{{ $personal->id }}" 
                                                 title="Ver">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        @endcan
 
-                                        @can('admin.personal.edit')
+                                        <!-- Botón Editar -->
                                         <button type="button" class="btn btn-success btn-sm mr-1" 
                                                 data-toggle="modal" data-target="#ModalUpdate{{ $personal->id }}" 
                                                 title="Editar">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
-                                        @endcan
 
-                                        @can('admin.personal.delete')
+                                        <!-- Botón Eliminar -->
                                         <form action="{{ route('admin.personal.destroy', $personal->id) }}" 
                                               method="POST" class="form-eliminar d-inline">
                                             @csrf
@@ -151,18 +147,10 @@
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
-                                        @endcan
-
-                                        @if(!auth()->user()->can('admin.personal.index') && 
-                                            !auth()->user()->can('admin.personal.edit') && 
-                                            !auth()->user()->can('admin.personal.delete'))
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endif
                                     </td>
                                 </tr>
 
                                 <!-- Modal Ver -->
-                                @can('admin.personal.index')
                                 <div class="modal fade" id="ModalVer{{ $personal->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalVerLabel{{ $personal->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg" role="document">
                                         <div class="modal-content">
@@ -387,7 +375,6 @@
                                 </div>
 
                                 <!-- Modal Editar -->
-                                @can('admin.personal.edit')
                                 <div class="modal fade" id="ModalUpdate{{ $personal->id }}" tabindex="-1" role="dialog" aria-labelledby="ModalUpdateLabel{{ $personal->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg" role="document">
                                         <div class="modal-content">
@@ -510,13 +497,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                @endcan
-
-                                <!-- Fin Modal Editar -->
-                                </div>
-                                    </div>
-                                </div>
-                                @endcan
                             @empty
                                 <tr>
                                     <td colspan="10" class="text-center">
@@ -537,7 +517,6 @@
 </div>
 
 <!-- Modal Crear -->
-@can('admin.personal.create')
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -693,7 +672,6 @@
         </div>
     </div>
 </div>
-@endcan
 @stop
 
 @section('css')
@@ -742,11 +720,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    @showModalOnErrors(['module' => 'personals'])
+    @if ($errors->any())
         $(document).ready(function () {
             $('#ModalCreate').modal('show');
         });
-    @endshowModalOnErrors
+    @endif
 
     $(document).ready(function() {
         // Verificar si hay datos en la tabla

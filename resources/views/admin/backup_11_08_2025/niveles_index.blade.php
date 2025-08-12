@@ -12,11 +12,10 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title mb-0">Niveles registrados</h3>
 
-                @createButton(['module' => 'niveles'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        Crear nuevo nivel
-                    </button>
-                @endcreateButton
+                <!-- Botón para abrir el modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Crear nuevo nivel
+                </button>
             </div>
 
             <div class="card-body">
@@ -35,26 +34,20 @@
                                 <td>{{ $nivel->nombre }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center">
-                                        @editButton(['module' => 'niveles'])
-                                            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
-                                                data-target="#ModalUpdate{{ $nivel->id }}">
-                                                <i class="fas fa-pencil-alt"></i> Editar
+                                        {{-- Botón Editar --}}
+                                        <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
+                                            data-target="#ModalUpdate{{ $nivel->id }}">
+                                            <i class="fas fa-pencil-alt"></i> Editar
+                                        </button>
+
+                                        {{-- Formulario Eliminar --}}
+                                        <form action="{{ url('admin/niveles/' . $nivel->id) }}" method="POST" class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
                                             </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'niveles'])
-                                            <form action="{{ url('admin/niveles/' . $nivel->id) }}" method="POST" class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash-alt"></i> Eliminar
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'niveles'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </div>
 
                                     <!-- Modal Editar Nivel -->

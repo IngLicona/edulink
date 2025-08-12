@@ -11,11 +11,9 @@
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title mb-0">Turnos registrados</h3>
-                @createButton(['module' => 'turnos'])
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
-                        <i class="fas fa-plus"></i> Crear nuevo turno
-                    </button>
-                @endcreateButton
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ModalCreate">
+                    Crear nuevo turno
+                </button>
             </div>
 
             <div class="card-body">
@@ -34,31 +32,22 @@
                                 <td>{{ $turno->nombre }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center">
-                                        @editButton(['module' => 'turnos'])
-                                            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
-                                                data-target="#ModalUpdate{{ $turno->id }}">
-                                                <i class="fas fa-pencil-alt"></i> Editar
+                                        <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
+                                            data-target="#ModalUpdate{{ $turno->id }}">
+                                            <i class="fas fa-pencil-alt"></i> Editar
+                                        </button>
+
+                                        <form action="{{ url('admin/turnos/' . $turno->id) }}" method="POST"
+                                            class="form-eliminar d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
                                             </button>
-                                        @endeditButton
-
-                                        @deleteButton(['module' => 'turnos'])
-                                            <form action="{{ url('admin/turnos/' . $turno->id) }}" method="POST"
-                                                class="form-eliminar d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash-alt"></i> Eliminar
-                                                </button>
-                                            </form>
-                                        @enddeleteButton
-
-                                        @noActions(['module' => 'turnos'])
-                                            <span class="text-muted small">Sin acciones disponibles</span>
-                                        @endnoActions
+                                        </form>
                                     </div>
 
                                     <!-- Modal Editar Turno -->
-                                    @modalEdit(['module' => 'turnos'])
                                     <div class="modal fade" id="ModalUpdate{{ $turno->id }}" tabindex="-1" role="dialog"
                                         aria-labelledby="ModalUpdateLabel" aria-hidden="true">
                                         <div class="modal-dialog" role="document">
@@ -102,7 +91,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @endmodalEdit
                                 </td>
                             </tr>
                         @endforeach
@@ -114,7 +102,6 @@
 </div>
 
 <!-- Modal Crear Turno -->
-@modalCreate(['module' => 'turnos'])
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -152,7 +139,6 @@
         </div>
     </div>
 </div>
-@endmodalCreate
 @stop
 
 @section('css')
@@ -162,13 +148,13 @@
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@showModalOnErrors(['module' => 'turnos'])
-<script>
-    $(document).ready(function () {
-        $('#ModalCreate').modal('show');
-    });
-</script>
-@endshowModalOnErrors
+@if ($errors->any())
+    <script>
+        $(document).ready(function () {
+            $('#ModalCreate').modal('show');
+        })
+    </script>
+@endif
 
 <script>
     document.querySelectorAll('.form-eliminar').forEach(form => {

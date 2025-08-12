@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content_header')
-    <h1><b>Bienvenido: </b>{{ Auth::user()->name }}</h1>
+    <h1><b>Bienvenido: {{Auth::user()->roles->pluck('name')->implode(', ')}}</b> - {{ Auth::user()->name }}</h1>
     <hr>
 
 @stop

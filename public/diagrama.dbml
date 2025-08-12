@@ -131,3 +131,13 @@ table asignaciones {
     estado varchar
     fecha_asignacion date
 }
+
+table pagos {
+    id int [pk, increment]
+    matriculacion_id int [ref: > matriculaciones.id]
+    monto decimal (10, 2)
+    metodo_pago varchar
+    descripcion varchar 
+    fecha_pago date
+    estado varchar
+}

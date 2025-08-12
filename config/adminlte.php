@@ -114,18 +114,21 @@ return [
             'url' => 'admin/configuracion',
             'icon' => 'fas fa-fw fa-cog',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.configuracions.index',
         ],
         [
             'text' => 'Gestiones',
             'url' => 'admin/gestiones',
             'icon' => 'fas fa-fw fa-tasks',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.gestions.index',
         ],
         [
             'text' => 'Periodos',
             'url' => 'admin/periodos',
             'icon' => 'fas fa-fw fa-calendar-alt',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.periodos.index',
 
         ],
         [
@@ -133,6 +136,7 @@ return [
             'url' => 'admin/niveles',
             'icon' => 'fas fa-fw fa-layer-group',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.nivels.index',
 
         ],
         [
@@ -140,6 +144,7 @@ return [
             'url' => 'admin/grados',
             'icon' => 'fas fa-fw fa-list-alt',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.grados.index',
 
         ],
         [
@@ -147,6 +152,7 @@ return [
             'url' => 'admin/paralelos',
             'icon' => 'fas fa-fw fa-clone',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.paralelos.index',
 
         ],
         [
@@ -154,6 +160,7 @@ return [
             'url' => 'admin/turnos',
             'icon' => 'fas fa-fw fa-clock',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.turnos.index',
 
         ],
         [
@@ -161,6 +168,7 @@ return [
             'url' => 'admin/materias',
             'icon' => 'fas fa-fw fa-book',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.materias.index',
 
         ],
         [
@@ -168,22 +176,26 @@ return [
             'url' => 'admin/roles',
             'icon' => 'fas fa-fw fa-user-check',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.roles.index',
 
         ],
         [
             'text' => 'Personal',
             'icon' => 'fas fa-fw fa-users-cog',
             'classes' => 'bg-blue text-white',
+            'can' => 'admin.personals.index',
             'submenu'=> [
                 [
                     'text' => 'Administrativo',
                     'url' => 'admin/personal/administrativo',
-                    'classes' => 'bg-white text-black'
+                    'classes' => 'bg-white text-black',
+                    'can' => 'admin.personals.index'
                 ],
                 [
                     'text' => 'Docente',
                     'url' => 'admin/personal/docente',
-                    'classes' => 'bg-white text-black'
+                    'classes' => 'bg-white text-black',
+                    'can' => 'admin.personals.index'
                 ],
             ],
 
@@ -192,26 +204,38 @@ return [
             'text' => 'Asignaciones',
             'icon' => 'fas fa-fw fa-chalkboard-teacher',
             'classes' => 'bg-blue text-white',
-            'url' => 'admin/asignaciones'  // CORREGIDO: era 'admin/asignciones'
+            'url' => 'admin/asignaciones',
+            'can' => 'admin.asignacions.index'  // CORREGIDO: era 'admin/asignciones'
         ],
         [
             'text' => 'Padres de Familia',
             'icon' => 'fas fa-fw fa-house-user',
             'classes' => 'bg-blue text-white',
-            'url' => 'admin/ppffs'
+            'url' => 'admin/ppffs',
+            'can' => 'admin.ppffs.index'
         ],
         [
             'text' => 'Estudiantes',
             'icon' => 'fas fa-fw fa-user-graduate',
             'classes' => 'bg-blue text-white',
-            'url' => 'admin/estudiantes'
+            'url' => 'admin/estudiantes',
+            'can' => 'admin.estudiantes.index'
         ],
         [
             'text' => 'Matriculacion',
             'icon' => 'fas fa-fw fa-clipboard-list',
             'classes' => 'bg-blue text-white',
-            'url' => 'admin/matriculaciones'
+            'url' => 'admin/matriculaciones',
+            'can' => 'admin.matriculaciones.index'
         ],
+        [
+            'text' => 'Pagos',
+            'icon' => 'fas fa-fw fa-money-bill-wave',
+            'classes' => 'bg-blue text-white',
+            'url' => 'admin/pagos',
+            'can' => 'admin.pagos.index'
+        ],
+        
         
     ],
 

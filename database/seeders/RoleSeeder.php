@@ -20,134 +20,142 @@ class RoleSeeder extends Seeder
         $secretarioRole = Role::firstOrCreate(['name' => 'SECRETARIO/A']);
         $docenteRole = Role::firstOrCreate(['name' => 'DOCENTE']);
         $estudianteRole = Role::firstOrCreate(['name' => 'ESTUDIANTE']);
+        $cajeroRole = Role::firstOrCreate(['name' => 'CAJERO/A']);
 
-        // Crear permisos específicos por módulo - CORREGIDO
+        // Crear permisos específicos por módulo
         $permissions = [
             // Configuración del sistema
             'admin.configuracion.index',
             'admin.configuracion.create',
             'admin.configuracion.store',
             
-            // Gestiones - CORREGIDO: agregado 'create' que faltaba
+            // Gestiones
             'admin.gestiones.index',
             'admin.gestiones.create',
             'admin.gestiones.store',
             'admin.gestiones.edit',
             'admin.gestiones.update',
-            'admin.gestiones.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.gestiones.delete',
             
-            // Periodos - CORREGIDO: agregado permisos que faltaban
+            // Periodos
             'admin.periodos.index',
             'admin.periodos.create',
             'admin.periodos.store',
             'admin.periodos.edit',
             'admin.periodos.update',
-            'admin.periodos.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.periodos.delete',
             
-            // Niveles - CORREGIDO: agregado permisos que faltaban
+            // Niveles
             'admin.niveles.index',
             'admin.niveles.create',
             'admin.niveles.store',
             'admin.niveles.edit',
             'admin.niveles.update',
-            'admin.niveles.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.niveles.delete',
             
-            // Grados - CORREGIDO: agregado permisos que faltaban
+            // Grados
             'admin.grados.index',
             'admin.grados.create',
             'admin.grados.store',
             'admin.grados.edit',
             'admin.grados.update',
-            'admin.grados.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.grados.delete',
             
-            // Paralelos - CORREGIDO: agregado permisos que faltaban
+            // Paralelos
             'admin.paralelos.index',
             'admin.paralelos.create',
             'admin.paralelos.store',
             'admin.paralelos.edit',
             'admin.paralelos.update',
-            'admin.paralelos.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.paralelos.delete',
             
-            // Turnos - CORREGIDO
+            // Turnos
             'admin.turnos.index',
             'admin.turnos.create',
             'admin.turnos.store',
             'admin.turnos.edit',
             'admin.turnos.update',
-            'admin.turnos.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.turnos.delete',
             
-            // Materias - CORREGIDO: agregado permisos que faltaban
+            // Materias
             'admin.materias.index',
             'admin.materias.create',
             'admin.materias.store',
             'admin.materias.edit',
             'admin.materias.update',
-            'admin.materias.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.materias.delete',
             
-            // Roles - CORREGIDO
+            // Roles
             'admin.roles.index',
             'admin.roles.create',
             'admin.roles.store',
             'admin.roles.edit',
             'admin.roles.update',
-            'admin.roles.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.roles.delete',
             'admin.roles.permisos',
             
-            // Personal - CORREGIDO
+            // Personal
             'admin.personal.index',
             'admin.personal.create',
             'admin.personal.store',
             'admin.personal.show',
             'admin.personal.edit',
             'admin.personal.update',
-            'admin.personal.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.personal.delete',
             
-            // Formaciones - CORREGIDO
+            // Formaciones
             'admin.formaciones.index',
             'admin.formaciones.create',
             'admin.formaciones.store',
             'admin.formaciones.show',
             'admin.formaciones.edit',
             'admin.formaciones.update',
-            'admin.formaciones.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.formaciones.delete',
             
-            // Estudiantes - CORREGIDO
+            // Estudiantes
             'admin.estudiantes.index',
             'admin.estudiantes.create',
             'admin.estudiantes.store',
             'admin.estudiantes.show',
             'admin.estudiantes.edit',
             'admin.estudiantes.update',
-            'admin.estudiantes.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.estudiantes.delete',
             
-            // Padres de familia - CORREGIDO
+            // Padres de familia
             'admin.ppffs.index',
             'admin.ppffs.create',
             'admin.ppffs.store',
             'admin.ppffs.show',
             'admin.ppffs.edit',
             'admin.ppffs.update',
-            'admin.ppffs.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.ppffs.delete',
             
-            // Asignaciones - CORREGIDO
+            // Asignaciones
             'admin.asignaciones.index',
             'admin.asignaciones.create',
             'admin.asignaciones.store',
             'admin.asignaciones.show',
             'admin.asignaciones.edit',
             'admin.asignaciones.update',
-            'admin.asignaciones.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.asignaciones.delete',
             
-            // Matriculaciones - CORREGIDO
+            // Matriculaciones
             'admin.matriculaciones.index',
             'admin.matriculaciones.create',
             'admin.matriculaciones.store',
             'admin.matriculaciones.show',
             'admin.matriculaciones.edit',
             'admin.matriculaciones.update',
-            'admin.matriculaciones.delete', // CAMBIADO de 'destroy' a 'delete'
+            'admin.matriculaciones.delete',
             'admin.matriculaciones.buscar_grados',
             'admin.matriculaciones.buscar_paralelos',
+
+            // Pagos
+            'admin.pagos.index',
+            'admin.pagos.ver_pagos',
+            'admin.pagos.store',
+            'admin.pagos.comprobante',
+            'admin.pagos.destroy'
         ];
 
         foreach ($permissions as $permission) {
@@ -157,13 +165,13 @@ class RoleSeeder extends Seeder
         // Asignar todos los permisos al administrador
         $adminRole->givePermissionTo(Permission::all());
 
-        // Asignar permisos específicos a director - CORREGIDO
+        // Asignar permisos específicos a director
         $directorPermissions = [
             'admin.gestiones.index',
             'admin.gestiones.create',
             'admin.gestiones.store',
             'admin.periodos.index',
-            'admin.periodos.create', // AGREGADO
+            'admin.periodos.create',
             'admin.periodos.store',
             'admin.niveles.index',
             'admin.grados.index',
@@ -179,7 +187,7 @@ class RoleSeeder extends Seeder
         ];
         $directorRole->givePermissionTo($directorPermissions);
 
-        // Asignar permisos específicos a secretario - CORREGIDO
+        // Asignar permisos específicos a secretario
         $secretarioPermissions = [
             'admin.estudiantes.index',
             'admin.estudiantes.create',
@@ -190,13 +198,13 @@ class RoleSeeder extends Seeder
             'admin.ppffs.index',
             'admin.ppffs.create',
             'admin.ppffs.store',
-            'admin.ppffs.show', // AGREGADO
-            'admin.ppffs.edit', // AGREGADO
-            'admin.ppffs.update', // AGREGADO
+            'admin.ppffs.show',
+            'admin.ppffs.edit',
+            'admin.ppffs.update',
             'admin.matriculaciones.index',
             'admin.matriculaciones.create',
             'admin.matriculaciones.store',
-            'admin.matriculaciones.show', // AGREGADO
+            'admin.matriculaciones.show',
         ];
         $secretarioRole->givePermissionTo($secretarioPermissions);
 
@@ -205,11 +213,21 @@ class RoleSeeder extends Seeder
             'admin.estudiantes.index',
             'admin.estudiantes.show',
             'admin.asignaciones.index',
-            'admin.asignaciones.show', // AGREGADO
+            'admin.asignaciones.show',
             'admin.materias.index',
         ];
         $docenteRole->givePermissionTo($docentePermissions);
 
-        // Los estudiantes no necesitan permisos administrativos por ahora
+        // Asignar permisos específicos a cajero
+        $cajeroPermissions = [
+            'admin.pagos.index',
+            'admin.pagos.ver_pagos',
+            'admin.pagos.store',
+            'admin.pagos.comprobante',
+            'admin.pagos.destroy',
+            'admin.matriculaciones.index',
+            'admin.matriculaciones.show'
+        ];
+        $cajeroRole->givePermissionTo($cajeroPermissions);
     }
 }

@@ -376,7 +376,6 @@ Route::post('/admin/asignaciones/validar-aula', [App\Http\Controllers\Asignacion
 });
 
 //Rutas para pagos (AGREGAR ESTAS AL FINAL DE TU WEB.PHP)
-/*
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/pagos', [App\Http\Controllers\PagoController::class, 'index'])->name('admin.pagos.index')->middleware('can:admin.pagos.index');
     Route::get('/admin/pagos/estudiante/{id}', [App\Http\Controllers\PagoController::class, 'ver_pagos'])->name('admin.pagos.ver_pagos')->middleware('can:admin.pagos.ver_pagos');
@@ -388,7 +387,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Rutas AJAX
     Route::post('/admin/pagos/matriculaciones-by-estudiante', [App\Http\Controllers\PagoController::class, 'getMatriculacionesByEstudiante'])->name('admin.pagos.matriculaciones-by-estudiante')->middleware('can:admin.pagos.index');
-});*/
+});
 
 // Rutas de Google OAuth
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');

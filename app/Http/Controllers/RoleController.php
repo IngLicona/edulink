@@ -112,7 +112,8 @@ class RoleController extends Controller
             'Estudiantes' => [],
             'Padres de familia' => [],
             'Asignaciones' => [],
-            'Matriculaciones' => []
+            'Matriculaciones' => [],
+            'Pagos' => []
         ];
 
         foreach ($permisos as $permiso) {
@@ -148,6 +149,8 @@ class RoleController extends Controller
                 $categorias['Asignaciones'][] = $permiso;
             } elseif (str_contains($nombre, 'matriculaciones')) {
                 $categorias['Matriculaciones'][] = $permiso;
+            } elseif (str_contains($nombre, 'pagos')) {
+                $categorias['Pagos'][] = $permiso;
             }
         }
 

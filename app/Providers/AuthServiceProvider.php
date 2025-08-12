@@ -23,9 +23,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Otorgar todos los permisos al rol super-admin
+        // Otorgar todos los permisos al rol ADMINISTRADOR
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('super-admin') ? true : null;
+            return $user->hasRole('ADMINISTRADOR') ? true : null;
         });
     }
 }

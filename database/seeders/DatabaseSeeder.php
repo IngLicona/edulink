@@ -205,6 +205,28 @@ class DatabaseSeeder extends Seeder
             'profesion' =>'Lic. en Biología',
             'foto' => null
         ]);
+        
+        // NUEVO PERSONAL DE CAJERO
+        $usuario6 = User::create([
+            'name' => 'Sofía Torres Vargas', 
+            'email' => 'sofia.torres@escuela.com', 
+            'password' => Hash::make('00112233')
+        ]);
+        $usuario6->assignRole('CAJERO/A');
+
+        $personal6 = Personal::create([
+            'usuario_id' => $usuario6->id,
+            'tipo' => 'administrativo',
+            'nombre' => 'Sofía',
+            'paterno' => 'Torres',
+            'materno' => 'Vargas',
+            'ci' => '00112233',
+            'fecha_nacimiento' => '1995-02-28',
+            'direccion' => 'Calle Tesoro 101, Col. Finanzas',
+            'telefono' => '9991112233',
+            'profesion' => 'Técnico en Contabilidad',
+            'foto' => null
+        ]);
 
         // FORMACIONES DE EJEMPLO
         
@@ -312,6 +334,16 @@ class DatabaseSeeder extends Seeder
             'archivo' => null
         ]);
 
+        // Formaciones para Sofía Torres (Cajero)
+        Formacion::create([
+            'personal_id' => $personal6->id,
+            'titulo' => 'Técnico Superior en Contabilidad',
+            'institucion' => 'Instituto de Formación Técnica',
+            'nivel' => 'Técnico',
+            'fecha_graduacion' => '2016-09-20',
+            'archivo' => null
+        ]);
+
         // EJEMPLO DE PPFFS PARA TESTING
         $ppff1 = Ppff::create([
             'nombre' => 'Carmen',
@@ -394,7 +426,7 @@ class DatabaseSeeder extends Seeder
             'estado' => 'activo'
         ]);
 
-                // PPFF adicionales
+        // PPFF adicionales
         $ppff4 = Ppff::create([
             'nombre' => 'Luis',
             'paterno' => 'Ramírez',

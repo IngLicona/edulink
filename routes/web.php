@@ -392,45 +392,33 @@ Route::middleware(['auth'])->group(function () {
 // Rutas para Asistencias (CORREGIDAS)
 Route::middleware(['auth'])->group(function () {
     // Ruta principal - cambié de POST a GET
-    Route::get('/admin/asistencias', [App\Http\Controllers\AsistenciaController::class, 'index'])
-        ->name('admin.asistencias.index')
-        ->middleware('can:admin.asistencias.index');
-    
+    Route::get('/admin/asistencias', [App\Http\Controllers\AsistenciaController::class, 'index'])->name('admin.asistencias.index')->middleware('can:admin.asistencias.index');
     // Formulario para crear asistencia
-    Route::get('/admin/asistencias/create/asignacion/{id}', [App\Http\Controllers\AsistenciaController::class, 'create'])
-        ->name('admin.asistencias.create')
-        ->middleware('can:admin.asistencias.create');
-    
+    Route::get('/admin/asistencias/create/asignacion/{id}', action: [App\Http\Controllers\AsistenciaController::class, 'create'])->name('admin.asistencias.create')->middleware('can:admin.asistencias.create');
     // Guardar asistencias
-    Route::post('/admin/asistencias', [App\Http\Controllers\AsistenciaController::class, 'store'])
-        ->name('admin.asistencias.store')
-        ->middleware('can:admin.asistencias.create');
-    
+    Route::post('/admin/asistencias', [App\Http\Controllers\AsistenciaController::class, 'store'])->name('admin.asistencias.store')->middleware('can:admin.asistencias.create');
     // Ver detalles de asistencias de una asignación
-    Route::get('/admin/asistencias/{asignacion}/show', [App\Http\Controllers\AsistenciaController::class, 'show'])
-        ->name('admin.asistencias.show')
-        ->middleware('can:admin.asistencias.index');
-    
+    Route::get('/admin/asistencias/{asignacion}/show', [App\Http\Controllers\AsistenciaController::class, 'show'])->name('admin.asistencias.show')->middleware('can:admin.asistencias.index');
     // Editar asistencia individual
-    Route::get('/admin/asistencias/{asistencia}/edit', [App\Http\Controllers\AsistenciaController::class, 'edit'])
-        ->name('admin.asistencias.edit')
-        ->middleware('can:admin.asistencias.edit');
-    
+    Route::get('/admin/asistencias/{asistencia}/edit', [App\Http\Controllers\AsistenciaController::class, 'edit'])->name('admin.asistencias.edit')->middleware('can:admin.asistencias.edit');
     // Actualizar asistencia individual
-    Route::put('/admin/asistencias/{asistencia}', [App\Http\Controllers\AsistenciaController::class, 'update'])
-        ->name('admin.asistencias.update')
-        ->middleware('can:admin.asistencias.edit');
-    
+    Route::put('/admin/asistencias/{asistencia}', [App\Http\Controllers\AsistenciaController::class, 'update'])->name('admin.asistencias.update')->middleware('can:admin.asistencias.edit');
     // Eliminar asistencia individual
-    Route::delete('/admin/asistencias/{asistencia}', [App\Http\Controllers\AsistenciaController::class, 'destroy'])
-        ->name('admin.asistencias.destroy')
-        ->middleware('can:admin.asistencias.delete');
-    
+    Route::delete('/admin/asistencias/{asistencia}', [App\Http\Controllers\AsistenciaController::class, 'destroy'])->name('admin.asistencias.destroy')->middleware('can:admin.asistencias.delete');
     // Generar reporte de asistencias
-    Route::get('/admin/asistencias/reporte', [App\Http\Controllers\AsistenciaController::class, 'reporte'])
-        ->name('admin.asistencias.reporte')
-        ->middleware('can:admin.asistencias.index');
+    Route::get('/admin/asistencias/reporte', [App\Http\Controllers\AsistenciaController::class, 'reporte'])->name('admin.asistencias.reporte')->middleware('can:admin.asistencias.index');
 });
+
+//Rutas para Calificaciones
+Route::get('/admin/calificaciones', [App\Http\Controllers\CalificacionController::class, 'index'])->name('admin.calificaciones.index')->middleware('can:admin.calificaciones.index');
+Route::get('/admin/calificaciones/create/asignacion/{id}', action: [App\Http\Controllers\CalificacionController::class, 'create'])->name('admin.calificaciones.create')->middleware('can:admin.calificaciones.create');
+Route::post('/admin/calificaciones', [App\Http\Controllers\CalificacionController::class, 'store'])->name('admin.calificaciones.store')->middleware('can:admin.calificaciones.create');
+Route::put('/admin/calificaciones/{id}', [App\Http\Controllers\CalificacionController::class, 'update'])->name('admin.calificaciones.update')->middleware('can:admin.calificaciones.update');
+Route::get('/admin/calificaciones/detalle/asignacion/{id_asignacion}/estudiante/{id_estudiante}', [App\Http\Controllers\CalificacionController::class, 'show_estudiante'])->name('admin.calificaciones.show_estudiante')->middleware('can:admin.calificaciones.show_estudiante');
+Route::get('/admin/calificaciones/asignacion/{id}', [App\Http\Controllers\CalificacionController::class, 'show_admin'])->name('admin.calificaciones.show_admin')->middleware('can:admin.calificaciones.show_admin');
+Route::delete('/admin/calificaciones/asignacion/{id}', [App\Http\Controllers\CalificacionController::class, 'destroy'])->name('admin.calificaciones.destroy')->middleware('can:admin.calificaciones.destroy');
+
+
 
 // Rutas de Google OAuth
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');

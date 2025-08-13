@@ -242,6 +242,14 @@ return [
             'url' => 'admin/asistencias',
             'can' => 'admin.asistencias.index'
         ],
+        [
+            'text' => 'Calificcaiones',
+            'icon' => 'fas fa-fw fa-graduation-cap',
+            'classes' => 'bg-blue text-white',
+            'url' => 'admin/calificaciones',
+            'can' => 'admin.calificaciones.index'
+        ],
+        
         
         
         

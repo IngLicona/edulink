@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asignacion;
-use App\Models\Asistencia;
 use App\Models\Personal;
 use App\Models\Estudiante;
 use App\Models\Matriculacion;
@@ -12,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Models\Asistencia;
+
 
 class AsistenciaController extends Controller
 {

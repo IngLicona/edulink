@@ -52,6 +52,12 @@ class Estudiante extends Model
         return $this->hasMany(Matriculacion::class);
     }
 
+    public function detalleCalificaciones()
+    {
+        return $this->hasMany(DetalleCalificacion::class);
+    }
+
+
     /**
      * Accessor para obtener el nombre completo
      */

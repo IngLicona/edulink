@@ -141,3 +141,19 @@ table pagos {
     fecha_pago date
     estado varchar
 }
+
+table calificaciones{
+    id int [pk, increment]
+    asignacion_id int [ref: > asignaciones.id]
+    periodo_id int [ref: > periodos.id]
+    tipo varchar
+    descripcion varchar
+    fecha date
+}
+
+table detalle_calificaciones {
+    id int [pk, increment]
+    calificacion_id int [ref: > calificaciones.id]
+    estudiante_id int [ref: > estudiantes.id]
+    nota decimal (5, 2)
+}

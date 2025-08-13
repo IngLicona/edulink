@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('asistencias', function (Blueprint $table) {
+        Schema::create('calificacions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('asignacion_id')->constrained('asignacions')->onDelete('cascade');
-            $table->unsignedBigInteger('estudiante_id');
-            $table->foreign('estudiante_id')->references('id')->on('estudiantes')->onDelete('cascade');
+            $table->foreignId('periodo_id')->constrained('periodos')->onDelete('cascade');
+            $table->string('tipo');
+            $table->string('descripcion')->nullable();
             $table->date('fecha');
-            $table->string('estado', 20);
-            $table->text('observacion')->nullable();
+
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('asistencias');
+        Schema::dropIfExists('calificacions');
     }
 };

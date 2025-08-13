@@ -168,6 +168,14 @@ class RoleSeeder extends Seeder
             'admin.asistencias.update',
             'admin.asistencias.delete',
             'admin.asistencias.reporte',
+                // Calificaciones
+                'admin.calificaciones.index',
+                'admin.calificaciones.create',
+                'admin.calificaciones.store',
+                'admin.calificaciones.show_estudiante',
+                'admin.calificaciones.show_admin',
+                'admin.calificaciones.update',
+                'admin.calificaciones.destroy',
         ];
 
         foreach ($permissions as $permission) {
@@ -256,5 +264,19 @@ class RoleSeeder extends Seeder
         $docenteRole->givePermissionTo($asistenciaPermissions);
         $directorRole->givePermissionTo($asistenciaPermissions);
         $secretarioRole->givePermissionTo($asistenciaPermissions);
+
+        //asignar permisos especificos a calificaciones
+        $calificacionPermissions = [
+            'admin.calificaciones.index',
+            'admin.calificaciones.create',
+            'admin.calificaciones.store',
+            'admin.calificaciones.show_estudiante',
+            'admin.calificaciones.show_admin',
+            'admin.calificaciones.update',
+            'admin.calificaciones.destroy'
+        ];
+        $docenteRole->givePermissionTo($calificacionPermissions);
+        $estudianteRole->givePermissionTo($calificacionPermissions);
+        $adminRole->givePermissionTo($calificacionPermissions);    
     }
 }

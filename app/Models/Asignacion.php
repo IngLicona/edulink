@@ -63,6 +63,11 @@ class Asignacion extends Model
         return $this->belongsTo(Turno::class);
     }
 
+    public function calificaciones()
+    {
+        return $this->belongsTo(Calificacion::class);
+    }
+
     // Accessors
     public function getDocenteNombreCompletoAttribute()
     {

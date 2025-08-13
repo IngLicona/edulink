@@ -156,6 +156,7 @@ return [
          * Package Service Providers...
          */
         Spatie\Permission\PermissionServiceProvider::class,
+        JeroenNoten\LaravelAdminLte\AdminLteServiceProvider::class,
 
         /*
          * Application Service Providers...

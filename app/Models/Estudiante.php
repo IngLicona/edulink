@@ -61,9 +61,24 @@ class Estudiante extends Model
     /**
      * Accessor para obtener el nombre completo
      */
+    public function getFullNameAttribute()
+    {
+        return trim("{$this->paterno} {$this->materno} {$this->nombre}");
+    }
+
     public function getNombreCompletoAttribute()
     {
-        return trim($this->nombre . ' ' . $this->paterno . ' ' . $this->materno);
+        return trim("{$this->paterno} {$this->materno} {$this->nombre}");
+    }
+
+    public function __toString()
+    {
+        return $this->nombre_completo . ' - CI: ' . $this->ci;
+    }
+
+    public function getPromedioAttribute()
+    {
+        return $this->detalleCalificaciones()->avg('nota') ?? 0;
     }
 
     /**

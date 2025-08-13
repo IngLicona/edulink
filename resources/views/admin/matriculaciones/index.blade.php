@@ -429,11 +429,11 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Estudiante *</label>
-                                <select name="estudiante_id" class="form-control" required>
+                                <select name="estudiante_id" class="form-control estudiante-select" required>
                                     <option value="">Seleccione un estudiante</option>
                                     @foreach($estudiantes as $estudiante)
                                         <option value="{{ $estudiante->id }}" {{ old('estudiante_id') == $estudiante->id ? 'selected' : '' }}>
-                                            {{ $estudiante->nombre_completo }} - CI: {{ $estudiante->ci }}
+                                            {{ $estudiante->paterno }} {{ $estudiante->materno }} {{ $estudiante->nombre }} - CI: {{ $estudiante->ci }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -780,7 +780,7 @@
             var gestionId = $(this).val();
             var estudianteSelect = $(this).closest('.modal').find('select[name="estudiante_id"]');
             
-            if (gestionId && $(this).closest('#ModalCreate').length > 0) {
+            if (gestionId) {
                 $.ajax({
                     url: '{{ route("admin.matriculaciones.estudiantes-disponibles") }}',
                     type: 'POST',
@@ -791,8 +791,16 @@
                     success: function(response) {
                         estudianteSelect.html('<option value="">Seleccione un estudiante</option>');
                         $.each(response, function(key, estudiante) {
-                            estudianteSelect.append('<option value="' + estudiante.id + '">' + estudiante.text + '</option>');
+                            estudianteSelect.append(
+                                '<option value="' + estudiante.id + '">' + 
+                                estudiante.nombre_completo + ' - CI: ' + estudiante.ci +
+                                '</option>'
+                            );
                         });
+                    },
+                    error: function() {
+                        // Si hay error, mostrar todos los estudiantes
+                        estudianteSelect.html($('.estudiante-select:first').html());
                     }
                 });
             }

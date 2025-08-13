@@ -65,7 +65,7 @@ class Asignacion extends Model
 
     public function calificaciones()
     {
-        return $this->belongsTo(Calificacion::class);
+        return $this->hasMany(Calificacion::class);
     }
 
     // Accessors

@@ -410,13 +410,44 @@ Route::middleware(['auth'])->group(function () {
 });
 
 //Rutas para Calificaciones
-Route::get('/admin/calificaciones', [App\Http\Controllers\CalificacionController::class, 'index'])->name('admin.calificaciones.index')->middleware('can:admin.calificaciones.index');
-Route::get('/admin/calificaciones/create/asignacion/{id}', action: [App\Http\Controllers\CalificacionController::class, 'create'])->name('admin.calificaciones.create')->middleware('can:admin.calificaciones.create');
-Route::post('/admin/calificaciones', [App\Http\Controllers\CalificacionController::class, 'store'])->name('admin.calificaciones.store')->middleware('can:admin.calificaciones.create');
-Route::put('/admin/calificaciones/{id}', [App\Http\Controllers\CalificacionController::class, 'update'])->name('admin.calificaciones.update')->middleware('can:admin.calificaciones.update');
-Route::get('/admin/calificaciones/detalle/asignacion/{id_asignacion}/estudiante/{id_estudiante}', [App\Http\Controllers\CalificacionController::class, 'show_estudiante'])->name('admin.calificaciones.show_estudiante')->middleware('can:admin.calificaciones.show_estudiante');
-Route::get('/admin/calificaciones/asignacion/{id}', [App\Http\Controllers\CalificacionController::class, 'show_admin'])->name('admin.calificaciones.show_admin')->middleware('can:admin.calificaciones.show_admin');
-Route::delete('/admin/calificaciones/asignacion/{id}', [App\Http\Controllers\CalificacionController::class, 'destroy'])->name('admin.calificaciones.destroy')->middleware('can:admin.calificaciones.destroy');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/calificaciones', [App\Http\Controllers\CalificacionController::class, 'index'])
+        ->name('admin.calificaciones.index')
+        ->middleware('can:admin.calificaciones.index');
+    
+    Route::get('/admin/calificaciones/create/asignacion/{id}', [App\Http\Controllers\CalificacionController::class, 'create'])
+        ->name('admin.calificaciones.create')
+        ->middleware('can:admin.calificaciones.create');
+    
+    Route::post('/admin/calificaciones', [App\Http\Controllers\CalificacionController::class, 'store'])
+        ->name('admin.calificaciones.store')
+        ->middleware('can:admin.calificaciones.create');
+    
+    Route::get('/admin/calificaciones/{id}/edit', [App\Http\Controllers\CalificacionController::class, 'edit'])
+        ->name('admin.calificaciones.edit')
+        ->middleware('can:admin.calificaciones.update');
+    
+    Route::put('/admin/calificaciones/{id}', [App\Http\Controllers\CalificacionController::class, 'update'])
+        ->name('admin.calificaciones.update')
+        ->middleware('can:admin.calificaciones.update');
+    
+    Route::get('/admin/calificaciones/detalle/asignacion/{id_asignacion}/estudiante/{id_estudiante}', 
+        [App\Http\Controllers\CalificacionController::class, 'show_estudiante'])
+        ->name('admin.calificaciones.show_estudiante')
+        ->middleware('can:admin.calificaciones.show_estudiante');
+    
+    Route::get('/admin/calificaciones/asignacion/{id}', [App\Http\Controllers\CalificacionController::class, 'show_admin'])
+        ->name('admin.calificaciones.show_admin')
+        ->middleware('can:admin.calificaciones.show_admin');
+    
+    Route::delete('/admin/calificaciones/{id}', [App\Http\Controllers\CalificacionController::class, 'destroy'])
+        ->name('admin.calificaciones.destroy')
+        ->middleware('can:admin.calificaciones.destroy');
+    
+    Route::get('/admin/calificaciones/{asignacion_id}/reporte', [App\Http\Controllers\CalificacionController::class, 'reporte'])
+        ->name('admin.calificaciones.reporte')
+        ->middleware('can:admin.calificaciones.index');
+});
 
 
 

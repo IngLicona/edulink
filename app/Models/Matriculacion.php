@@ -19,6 +19,7 @@ class Matriculacion extends Model
         'nivel_id',
         'grado_id',
         'paralelo_id',
+        'asignacion_id',
         'fecha_matriculacion',
         'estado'
     ];
@@ -73,6 +74,14 @@ class Matriculacion extends Model
     public function paralelo()
     {
         return $this->belongsTo(Paralelo::class);
+    }
+
+    /**
+     * Relación con Asignacion
+     */
+    public function asignacion()
+    {
+        return $this->belongsTo(Asignacion::class);
     }
 
     /**

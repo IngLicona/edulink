@@ -1,27 +1,36 @@
-@extends('layouts.admin')
+@extends('adminlte::page')
+
+@section('content_header')
+    <h1>Mis Asignaciones - Registro de Calificaciones</h1>
+    <div class="alert alert-info">
+        <i class="fas fa-user-tie mr-2"></i>
+        <strong>Docente:</strong> {{ $docente->nombre . ' ' . $docente->paterno . ' ' . $docente->materno }}
+    </div>
+@stop
 
 @section('content')
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">Mis Calificaciones</h1>
-                <p class="text-muted">Docente: {{ $docente->nombre }} {{ $docente->paterno }} {{ $docente->materno }}</p>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-outline card-primary">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <label for="mostrar" class="mr-2 mb-0">Mostrar</label>
+                    <select id="mostrar" class="form-control form-control-sm" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="ml-2">Asignaciones</span>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <label for="buscar" class="mr-2 mb-0">Buscador:</label>
+                    <input type="text" id="buscar" class="form-control form-control-sm" style="width: 200px;">
+                </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Inicio</a></li>
-                    <li class="breadcrumb-item active">Mis Calificaciones</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
+            <div class="card-body">
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('success') }}
@@ -40,128 +49,224 @@
                     </div>
                 @endif
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Mis Asignaciones Activas</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th width="5%">#</th>
-                                        <th>Gestión</th>
-                                        <th>Nivel</th>
-                                        <th>Grado</th>
-                                        <th>Paralelo</th>
-                                        <th>Materia</th>
-                                        <th>Turno</th>
-                                        <th width="15%" class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($asignaciones as $asignacion)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>
-                                            <span class="badge badge-primary">{{ $asignacion->gestion->nombre }}</span>
-                                        </td>
-                                        <td>{{ $asignacion->nivel->nombre }}</td>
-                                        <td>{{ $asignacion->grado->nombre }}</td>
-                                        <td>{{ $asignacion->paralelo->nombre }}</td>
-                                        <td>
-                                            <strong>{{ $asignacion->materia->nombre }}</strong>
-                                        </td>
-                                        <td>{{ $asignacion->turno->nombre }}</td>
-                                        <td class="text-center">
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('admin.calificaciones.show_admin', $asignacion->id) }}" 
-                                                   class="btn btn-info btn-sm" title="Ver Calificaciones">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('admin.calificaciones.create', $asignacion->id) }}" 
-                                                   class="btn btn-success btn-sm" title="Registrar Calificaciones">
-                                                    <i class="fas fa-plus"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center">
-                                            <div class="py-4">
-                                                <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
-                                                <p class="text-muted">No tienes asignaciones activas en este momento.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <div class="table-responsive">
+                    <table id="asignacionesTable" class="table table-bordered table-striped table-hover table-sm">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Nro</th>
+                                <th>Estado</th>
+                                <th>Gestión</th>
+                                <th>Curso</th>
+                                <th>Materia</th>
+                                <th>Turno</th>
+                                <th>Fecha Asignación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($asignaciones as $index => $asignacion)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>
+                                        @if($asignacion->estado == 'activo')
+                                            <span class="badge badge-success">ACTIVO</span>
+                                        @else
+                                            <span class="badge badge-danger">INACTIVO</span>
+                                        @endif
+                                    </td>
+                                    <td><span class="badge badge-primary">{{ $asignacion->gestion->nombre }}</span></td>
+                                    <td>
+                                        <strong>{{ $asignacion->nivel->nombre }}</strong><br>
+                                        {{ $asignacion->grado->nombre }} "{{ $asignacion->paralelo->nombre }}"
+                                    </td>
+                                    <td><span class="badge badge-info">{{ $asignacion->materia->nombre }}</span></td>
+                                    <td><span class="badge badge-warning">{{ $asignacion->turno->nombre }}</span></td>
+                                    <td>{{ $asignacion->fecha_asignacion ? $asignacion->fecha_asignacion->format('d/m/Y') : 'No registrada' }}</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('admin.calificaciones.create', $asignacion->id) }}" 
+                                               class="btn btn-success btn-sm" 
+                                               title="Registrar Calificación">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
 
-                @if($asignaciones->count() > 0)
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="info-box">
-                            <span class="info-box-icon bg-info"><i class="fas fa-chalkboard-teacher"></i></span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Total Asignaciones</span>
-                                <span class="info-box-number">{{ $asignaciones->count() }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-box">
-                            <span class="info-box-icon bg-success"><i class="fas fa-book"></i></span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Materias</span>
-                                <span class="info-box-number">{{ $asignaciones->pluck('materia.nombre')->unique()->count() }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="info-box">
-                            <span class="info-box-icon bg-warning"><i class="fas fa-graduation-cap"></i></span>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Niveles</span>
-                                <span class="info-box-number">{{ $asignaciones->pluck('nivel.nombre')->unique()->count() }}</span>
-                            </div>
-                        </div>
+                                            <a href="{{ route('admin.calificaciones.show_admin', $asignacion->id) }}" 
+                                               class="btn btn-info btn-sm" 
+                                               title="Ver Calificaciones">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            <button type="button" 
+                                                    class="btn btn-warning btn-sm" 
+                                                    data-toggle="modal" 
+                                                    data-target="#modalReporte{{ $asignacion->id }}"
+                                                    title="Generar Reporte">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center">
+                                        <div class="alert alert-warning mb-0">
+                                            <h5><i class="fas fa-exclamation-triangle"></i> No hay asignaciones</h5>
+                                            <p class="mb-0">No tienes asignaciones activas para registrar calificaciones.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        @if($asignaciones->count() > 0)
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info"><i class="fas fa-chalkboard-teacher"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Asignaciones</span>
+                        <span class="info-box-number">{{ $asignaciones->count() }}</span>
                     </div>
                 </div>
-                @endif
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="fas fa-book"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Materias</span>
+                        <span class="info-box-number">{{ $asignaciones->pluck('materia.nombre')->unique()->count() }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="fas fa-graduation-cap"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Niveles</span>
+                        <span class="info-box-number">{{ $asignaciones->pluck('nivel.nombre')->unique()->count() }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
+
+<!-- Modales para Reportes -->
+@foreach($asignaciones as $asignacion)
+    <div class="modal fade" id="modalReporte{{ $asignacion->id }}" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">Reporte de Calificaciones</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('admin.calificaciones.reporte', ['asignacion_id' => $asignacion->id]) }}" method="GET" target="_blank">
+                    <div class="modal-body">
+                        <input type="hidden" name="asignacion_id" value="{{ $asignacion->id }}">
+                        
+                        <div class="card card-outline card-info mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-info-circle mr-2"></i>Mi Asignación</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Curso:</strong> {{ $asignacion->nivel->nombre }} - {{ $asignacion->grado->nombre }} "{{ $asignacion->paralelo->nombre }}"</p>
+                                <p><strong>Materia:</strong> {{ $asignacion->materia->nombre }}</p>
+                                <p class="mb-0"><strong>Turno:</strong> {{ $asignacion->turno->nombre }}</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Período *</label>
+                            <select name="periodo_id" class="form-control" required>
+                                <option value="">Seleccionar período</option>
+                                @foreach($periodos ?? [] as $periodo)
+                                    <option value="{{ $periodo->id }}">{{ $periodo->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-chart-bar"></i> Generar Reporte
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
-@endsection
+@endforeach
+@stop
 
-@section('scripts')
+@section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
+    <style>
+        .btn-group .btn {
+            margin-right: 2px;
+        }
+        .card-outline {
+            border-top: 3px solid;
+        }
+        .card-outline.card-info {
+            border-top-color: #17a2b8;
+        }
+        .card-outline.card-primary {
+            border-top-color: #007bff;
+        }
+        .badge {
+            font-size: 0.75em;
+        }
+        .info-box .info-box-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+    </style>
+@stop
+
+@section('js')
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+
 <script>
-$(document).ready(function() {
-    @if($asignaciones->count() > 0)
-    $('.table').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-        },
-        "order": [[ 1, "desc" ], [ 2, "asc" ]]
+    $(document).ready(function() {
+        var hasData = {{ count($asignaciones) > 0 ? 'true' : 'false' }};
+        var table;
+
+        if (hasData) {
+            table = $('#asignacionesTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                },
+                "responsive": true,
+                "autoWidth": false,
+                "pageLength": 10,
+                "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]],
+                "columnDefs": [
+                    { "orderable": false, "targets": -1 }
+                ],
+                "order": [[ 2, "desc" ], [ 3, "asc" ]]
+            });
+
+            $('.dataTables_length, .dataTables_filter').hide();
+
+            $('#mostrar').on('change', function() {
+                table.page.len($(this).val()).draw();
+            });
+
+            $('#buscar').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+        } else {
+            $('#buscar, #mostrar').prop('disabled', true);
+        }
     });
-    @endif
-});
 </script>
-@endsection
+@stop

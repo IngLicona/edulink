@@ -21,71 +21,91 @@ class CalificacionController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-        $roles = $user->roles->pluck('name')->toArray();
-
-        if (in_array('ADMINISTRADOR', $roles) || in_array('DIRECTOR/A GENERAL', $roles) || in_array('SECRETARIO/A', $roles)) {
-            // Vista para administradores y directores
-            $asignaciones = Asignacion::with(['docente', 'gestion', 'nivel', 'grado', 'paralelo', 'materia', 'turno'])
-                ->where('estado', 'activo')
-                ->orderBy('gestion_id', 'desc')
-                ->orderBy('nivel_id')
-                ->orderBy('grado_id')
-                ->orderBy('paralelo_id')
-                ->get();
-            
-            return view('admin.calificaciones.index', compact('asignaciones'));
-        }
-        
-        if (in_array('DOCENTE', $roles)) {
-            // Vista para docentes
-            $docente = Personal::where('usuario_id', $user->id)->first();
-            
-            if (!$docente) {
-                return redirect()->route('admin.index')->with('error', 'No se encontró información del docente.');
-            }
-            
-            $asignaciones = Asignacion::with(['gestion', 'nivel', 'grado', 'paralelo', 'materia', 'turno'])
-                ->where('docente_id', $docente->id)
-                ->where('estado', 'activo')
-                ->orderBy('gestion_id', 'desc')
-                ->get();
-            
-            return view('admin.calificaciones.index_docente', compact('docente', 'asignaciones'));
-        }
-        
-        if (in_array('ESTUDIANTE', $roles)) {
-            // Vista para estudiantes - mostrar sus calificaciones
-            $estudiante = Estudiante::where('usuario_id', $user->id)->first();
-            
-            if (!$estudiante) {
-                return redirect()->route('admin.index')->with('error', 'No se encontró información del estudiante.');
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return redirect()->route('login');
             }
 
-            // Obtener matriculaciones activas del estudiante
-            $matriculaciones = Matriculacion::where('estudiante_id', $estudiante->id)
-                ->where('estado', 'activo')
-                ->with(['asignacion.materia', 'asignacion.docente', 'asignacion.gestion', 
-                       'asignacion.nivel', 'asignacion.grado', 'asignacion.paralelo'])
-                ->get();
+            $roles = $user->roles->pluck('name')->toArray();
 
-            // Obtener calificaciones del estudiante
-            $calificaciones = [];
-            foreach ($matriculaciones as $matriculacion) {
-                $calif = DetalleCalificacion::with(['calificacion.periodo', 'calificacion.asignacion.materia'])
-                    ->where('estudiante_id', $estudiante->id)
-                    ->whereHas('calificacion.asignacion', function($query) use ($matriculacion) {
-                        $query->where('id', $matriculacion->asignacion_id);
-                    })
+            if (in_array('ADMINISTRADOR', $roles) || in_array('DIRECTOR/A GENERAL', $roles) || in_array('SECRETARIO/A', $roles)) {
+                // Vista para administradores y directores
+                $asignaciones = Asignacion::with(['docente', 'gestion', 'nivel', 'grado', 'paralelo', 'materia', 'turno'])
+                    ->where('estado', 'activo')
+                    ->orderBy('gestion_id', 'desc')
+                    ->orderBy('nivel_id')
+                    ->orderBy('grado_id')
+                    ->orderBy('paralelo_id')
                     ->get();
-                    
-                $calificaciones[$matriculacion->asignacion_id] = $calif;
+
+                // Obtener los periodos de la gestión actual
+                $periodos = Periodo::whereIn('gestion_id', $asignaciones->pluck('gestion_id')->unique())
+                    ->orderBy('nombre')
+                    ->get();
+                
+                return view('admin.calificaciones.index', compact('asignaciones', 'periodos'));
+            }
+        
+            if (in_array('DOCENTE', $roles)) {
+                // Vista para docentes
+                $docente = Personal::where('usuario_id', $user->id)->first();
+                
+                if (!$docente) {
+                    return redirect()->route('admin.index')->with('error', 'No se encontró información del docente.');
+                }
+                
+                $asignaciones = Asignacion::with(['gestion', 'nivel', 'grado', 'paralelo', 'materia', 'turno'])
+                    ->where('docente_id', $docente->id)
+                    ->where('estado', 'activo')
+                    ->orderBy('gestion_id', 'desc')
+                    ->get();
+                
+                // Obtener los periodos de las gestiones asignadas
+                $periodos = Periodo::whereIn('gestion_id', $asignaciones->pluck('gestion_id')->unique())
+                    ->orderBy('nombre')
+                    ->get();
+                
+                return view('admin.calificaciones.index_docente', compact('docente', 'asignaciones', 'periodos'));
             }
             
-            return view('admin.calificaciones.index_estudiante', compact('estudiante', 'matriculaciones', 'calificaciones'));
+            if (in_array('ESTUDIANTE', $roles)) {
+                // Vista para estudiantes - mostrar sus calificaciones
+                $estudiante = Estudiante::where('usuario_id', $user->id)->first();
+                
+                if (!$estudiante) {
+                    return redirect()->route('admin.index')->with('error', 'No se encontró información del estudiante.');
+                }
+
+                // Obtener matriculaciones activas del estudiante
+                $matriculaciones = Matriculacion::where('estudiante_id', $estudiante->id)
+                    ->where('estado', 'activo')
+                    ->with(['asignacion.materia', 'asignacion.docente', 'asignacion.gestion', 
+                           'asignacion.nivel', 'asignacion.grado', 'asignacion.paralelo'])
+                    ->get();
+
+                // Obtener calificaciones del estudiante
+                $calificaciones = [];
+                foreach ($matriculaciones as $matriculacion) {
+                    $calif = DetalleCalificacion::with(['calificacion.periodo', 'calificacion.asignacion.materia'])
+                        ->where('estudiante_id', $estudiante->id)
+                        ->whereHas('calificacion.asignacion', function($query) use ($matriculacion) {
+                            $query->where('id', $matriculacion->asignacion_id);
+                        })
+                        ->get();
+                        
+                    $calificaciones[$matriculacion->asignacion_id] = $calif;
+                }
+                
+                return view('admin.calificaciones.index_estudiante', compact('estudiante', 'matriculaciones', 'calificaciones'));
+            }
+            
+            return redirect()->route('admin.index')->with('error', 'No tiene permisos para acceder a este módulo.');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('admin.index')
+                ->with('error', 'Error al cargar las calificaciones: ' . $e->getMessage());
         }
-        
-        return redirect()->route('admin.index')->with('error', 'No tiene permisos para acceder a este módulo.');
     }
 
     /**
@@ -175,7 +195,10 @@ class CalificacionController extends Controller
                   ->where('estado', 'activo');
         })->orderBy('paterno')->orderBy('materno')->orderBy('nombre')->get();
 
-        return view('admin.calificaciones.show_admin', compact('asignacion', 'calificaciones', 'estudiantes'));
+        // Obtener periodos de la gestión para organizar las calificaciones
+        $periodos = Periodo::where('gestion_id', $asignacion->gestion_id)->get();
+
+        return view('admin.calificaciones.show_admin', compact('asignacion', 'calificaciones', 'estudiantes', 'periodos'));
     }
 
     /**
@@ -290,6 +313,83 @@ class CalificacionController extends Controller
                            
         } catch (\Exception $e) {
             return back()->with('error', 'Error al eliminar la calificación: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Generar reporte de calificaciones por período en PDF
+     */
+    public function reporte(Request $request, $asignacion_id)
+    {
+        try {
+            $asignacion = Asignacion::with(['docente', 'gestion', 'nivel', 'grado', 'paralelo', 'materia', 'turno'])
+                ->findOrFail($asignacion_id);
+
+            // Si no es reporte general, validar período
+            if (!$request->has('general')) {
+                $request->validate([
+                    'periodo_id' => 'required|exists:periodos,id'
+                ], [
+                    'periodo_id.required' => 'Debe seleccionar un período',
+                    'periodo_id.exists' => 'El período seleccionado no es válido'
+                ]);
+
+                $periodo = Periodo::findOrFail($request->periodo_id);
+                
+                $calificaciones = Calificacion::with(['periodo', 'detalleCalificaciones.estudiante'])
+                    ->where('asignacion_id', $asignacion_id)
+                    ->where('periodo_id', $request->periodo_id)
+                    ->orderBy('fecha')
+                    ->get();
+            } else {
+                // Para reporte general, obtener todas las calificaciones
+                $calificaciones = Calificacion::with(['periodo', 'detalleCalificaciones.estudiante'])
+                    ->where('asignacion_id', $asignacion_id)
+                    ->orderBy('periodo_id')
+                    ->orderBy('fecha')
+                    ->get();
+            }
+
+            $estudiantes = Estudiante::whereHas('matriculaciones', function($query) use ($asignacion_id) {
+                $query->where('asignacion_id', $asignacion_id)
+                      ->where('estado', 'activo');
+            })->orderBy('paterno')->orderBy('materno')->orderBy('nombre')->get();
+
+            $periodos = Periodo::where('gestion_id', $asignacion->gestion_id)
+                              ->orderBy('nombre')
+                              ->get();
+            
+            // Obtener la configuración
+            $configuracion = \App\Models\Configuracion::first();
+
+            $data = [
+                'asignacion' => $asignacion,
+                'calificaciones' => $calificaciones,
+                'estudiantes' => $estudiantes,
+                'periodos' => $periodos,
+                'configuracion' => $configuracion,
+                'es_general' => $request->has('general')
+            ];
+
+            // Generar el PDF con DomPDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.calificaciones.reporte', $data);
+            
+            // Configurar el PDF
+            $pdf->setPaper('A4', 'landscape');
+            $pdf->setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
+
+            // Generar nombre del archivo
+            $nombreArchivo = 'calificaciones_' . 
+                           $asignacion->materia->nombre . '_' . 
+                           $asignacion->grado->nombre . $asignacion->paralelo->nombre . '_' .
+                           ($request->has('general') ? 'general_' : 'periodo_' . $request->periodo_id . '_') .
+                           $asignacion->gestion->nombre . '.pdf';
+
+            // Descargar el PDF
+            return $pdf->download($nombreArchivo);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al generar el reporte: ' . $e->getMessage());
         }
     }
 }

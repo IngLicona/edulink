@@ -16,6 +16,8 @@ class DetalleCalificacion extends Model
         'nota' => 'decimal:2'
     ];
 
+    protected $appends = ['calificacion_literal', 'estado'];
+
     public function calificacion()
     {
         return $this->belongsTo(Calificacion::class);

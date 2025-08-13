@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('descripcion')->nullable();
             $table->date('fecha');
 
+            $table->index(['asignacion_id', 'periodo_id']);
             $table->timestamps();
         });
     }

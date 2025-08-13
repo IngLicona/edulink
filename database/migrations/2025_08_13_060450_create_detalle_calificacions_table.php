@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('calificacion_id')->constrained('calificacions')->onDelete('cascade');
             $table->foreignId('estudiante_id')->constrained('estudiantes')->onDelete('cascade');
             $table->decimal('nota', 5, 2);
+            $table->index(['calificacion_id', 'estudiante_id']);
             $table->timestamps();
         });
     }

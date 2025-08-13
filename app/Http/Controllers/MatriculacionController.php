@@ -43,7 +43,12 @@ class MatriculacionController extends Controller
             ]);
         }
         
-        $estudiantes = Estudiante::where('estado', 'activo')->with('ppff')->get();
+        $estudiantes = Estudiante::where('estado', 'activo')
+            ->with('ppff')
+            ->orderBy('paterno')
+            ->orderBy('materno')
+            ->orderBy('nombre')
+            ->get();
         $turnos = Turno::all();
         $gestiones = Gestion::all();
         $niveles = Nivel::all();
@@ -127,7 +132,26 @@ class MatriculacionController extends Controller
             // Verificar relaciones jerárquicas
             $this->validateHierarchy($request);
 
-            Matriculacion::create($request->all());
+            // Buscar la asignación correspondiente
+            $asignacion = \App\Models\Asignacion::where([
+                'gestion_id' => $request->gestion_id,
+                'nivel_id' => $request->nivel_id,
+                'grado_id' => $request->grado_id,
+                'paralelo_id' => $request->paralelo_id,
+                'estado' => 'activo'
+            ])->first();
+
+            if (!$asignacion) {
+                DB::rollback();
+                return redirect()->back()
+                    ->with('error', 'No existe una asignación activa para el nivel, grado y paralelo seleccionados')
+                    ->withInput();
+            }
+
+            // Crear la matriculación incluyendo el asignacion_id
+            $data = $request->all();
+            $data['asignacion_id'] = $asignacion->id;
+            Matriculacion::create($data);
 
             DB::commit();
 
@@ -209,7 +233,26 @@ class MatriculacionController extends Controller
             // Verificar relaciones jerárquicas
             $this->validateHierarchy($request);
 
-            $matriculacion->update($request->all());
+            // Buscar la asignación correspondiente
+            $asignacion = \App\Models\Asignacion::where([
+                'gestion_id' => $request->gestion_id,
+                'nivel_id' => $request->nivel_id,
+                'grado_id' => $request->grado_id,
+                'paralelo_id' => $request->paralelo_id,
+                'estado' => 'activo'
+            ])->first();
+
+            if (!$asignacion) {
+                DB::rollback();
+                return redirect()->back()
+                    ->with('error', 'No existe una asignación activa para el nivel, grado y paralelo seleccionados')
+                    ->withInput();
+            }
+
+            // Actualizar la matriculación incluyendo el asignacion_id
+            $data = $request->all();
+            $data['asignacion_id'] = $asignacion->id;
+            $matriculacion->update($data);
 
             DB::commit();
 
@@ -540,15 +583,17 @@ class MatriculacionController extends Controller
         $estudiantes = Estudiante::where('estado', 'activo')
             ->whereNotIn('id', $estudiantesMatriculados)
             ->with('ppff')
-            ->orderBy('nombre')
             ->orderBy('paterno')
+            ->orderBy('materno')
+            ->orderBy('nombre')
             ->get();
 
         return response()->json($estudiantes->map(function ($estudiante) {
+            $nombreCompleto = $estudiante->paterno . ' ' . $estudiante->materno . ' ' . $estudiante->nombre;
             return [
                 'id' => $estudiante->id,
-                'text' => $estudiante->nombre_completo . ' - CI: ' . $estudiante->ci,
-                'nombre_completo' => $estudiante->nombre_completo,
+                'text' => $nombreCompleto . ' - CI: ' . $estudiante->ci,
+                'nombre_completo' => $nombreCompleto,
                 'ci' => $estudiante->ci,
                 'ppff' => $estudiante->ppff ? $estudiante->ppff->nombre_completo : 'Sin PPFF',
                 'ppff_telefono' => $estudiante->ppff ? $estudiante->ppff->telefono : null

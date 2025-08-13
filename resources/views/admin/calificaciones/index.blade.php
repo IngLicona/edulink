@@ -5,18 +5,7 @@
     <hr>
 @stop
 
-@se    <!-- Modales para Reportes -->
-@foreach($asignaciones as $asignacion)
-    @can('admin.calificaciones.reporte')
-    <div class="modal fade" id="modalReporte{{ $asignacion->id }}" tabindex="-1" role="dialog" aria-labelledby="modalReporteLabel{{ $asignacion->id }}" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title" id="modalReporteLabel{{ $asignacion->id }}">Generar Reporte de Calificaciones</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>ent')
+@section('content')
 <div class="row">
     <div class="col-md-12">
         <div class="card card-outline card-primary">
@@ -161,6 +150,7 @@
 
 <!-- Modales para Reportes -->
 @foreach($asignaciones as $asignacion)
+    @if(auth()->user()->hasAnyPermission(['admin.calificaciones.reporte', 'admin.calificaciones.generar-reporte']))
     <div class="modal fade" id="modalReporte{{ $asignacion->id }}" tabindex="-1" role="dialog" aria-labelledby="modalReporteLabel{{ $asignacion->id }}" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -206,7 +196,7 @@
             </div>
         </div>
     </div>
-    @endcan
+    @endif
 @endforeach
 @stop
 

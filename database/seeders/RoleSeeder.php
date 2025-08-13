@@ -14,6 +14,8 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
+        // Limpiar la caché de permisos para evitar errores de asignación
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         // Crear roles básicos
         $adminRole = Role::firstOrCreate(['name' => 'ADMINISTRADOR']);
         $directorRole = Role::firstOrCreate(['name' => 'DIRECTOR/A GENERAL']);
@@ -155,7 +157,17 @@ class RoleSeeder extends Seeder
             'admin.pagos.ver_pagos',
             'admin.pagos.store',
             'admin.pagos.comprobante',
-            'admin.pagos.destroy'
+            'admin.pagos.destroy',
+
+            // Asistencias - AGREGAR ESTOS PERMISOS
+            'admin.asistencias.index',
+            'admin.asistencias.create',
+            'admin.asistencias.store',
+            'admin.asistencias.show',
+            'admin.asistencias.edit',
+            'admin.asistencias.update',
+            'admin.asistencias.delete',
+            'admin.asistencias.reporte',
         ];
 
         foreach ($permissions as $permission) {
@@ -229,5 +241,20 @@ class RoleSeeder extends Seeder
             'admin.matriculaciones.show'
         ];
         $cajeroRole->givePermissionTo($cajeroPermissions);
+
+        //asignar permisos especificos a asistencias
+        $asistenciaPermissions = [
+        'admin.asistencias.index',
+        'admin.asistencias.create',
+        'admin.asistencias.store',
+        'admin.asistencias.show',
+        'admin.asistencias.edit',
+        'admin.asistencias.update',
+        'admin.asistencias.delete',
+        'admin.asistencias.reporte'
+    ];
+        $docenteRole->givePermissionTo($asistenciaPermissions);
+        $directorRole->givePermissionTo($asistenciaPermissions);
+        $secretarioRole->givePermissionTo($asistenciaPermissions);
     }
 }

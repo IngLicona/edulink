@@ -389,6 +389,49 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/pagos/matriculaciones-by-estudiante', [App\Http\Controllers\PagoController::class, 'getMatriculacionesByEstudiante'])->name('admin.pagos.matriculaciones-by-estudiante')->middleware('can:admin.pagos.index');
 });
 
+// Rutas para Asistencias (CORREGIDAS)
+Route::middleware(['auth'])->group(function () {
+    // Ruta principal - cambié de POST a GET
+    Route::get('/admin/asistencias', [App\Http\Controllers\AsistenciaController::class, 'index'])
+        ->name('admin.asistencias.index')
+        ->middleware('can:admin.asistencias.index');
+    
+    // Formulario para crear asistencia
+    Route::get('/admin/asistencias/create/asignacion/{id}', [App\Http\Controllers\AsistenciaController::class, 'create'])
+        ->name('admin.asistencias.create')
+        ->middleware('can:admin.asistencias.create');
+    
+    // Guardar asistencias
+    Route::post('/admin/asistencias', [App\Http\Controllers\AsistenciaController::class, 'store'])
+        ->name('admin.asistencias.store')
+        ->middleware('can:admin.asistencias.create');
+    
+    // Ver detalles de asistencias de una asignación
+    Route::get('/admin/asistencias/{asignacion}/show', [App\Http\Controllers\AsistenciaController::class, 'show'])
+        ->name('admin.asistencias.show')
+        ->middleware('can:admin.asistencias.index');
+    
+    // Editar asistencia individual
+    Route::get('/admin/asistencias/{asistencia}/edit', [App\Http\Controllers\AsistenciaController::class, 'edit'])
+        ->name('admin.asistencias.edit')
+        ->middleware('can:admin.asistencias.edit');
+    
+    // Actualizar asistencia individual
+    Route::put('/admin/asistencias/{asistencia}', [App\Http\Controllers\AsistenciaController::class, 'update'])
+        ->name('admin.asistencias.update')
+        ->middleware('can:admin.asistencias.edit');
+    
+    // Eliminar asistencia individual
+    Route::delete('/admin/asistencias/{asistencia}', [App\Http\Controllers\AsistenciaController::class, 'destroy'])
+        ->name('admin.asistencias.destroy')
+        ->middleware('can:admin.asistencias.delete');
+    
+    // Generar reporte de asistencias
+    Route::get('/admin/asistencias/reporte', [App\Http\Controllers\AsistenciaController::class, 'reporte'])
+        ->name('admin.asistencias.reporte')
+        ->middleware('can:admin.asistencias.index');
+});
+
 // Rutas de Google OAuth
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');

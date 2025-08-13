@@ -270,13 +270,46 @@ class RoleSeeder extends Seeder
             'admin.calificaciones.index',
             'admin.calificaciones.create',
             'admin.calificaciones.store',
+            'admin.calificaciones.show',
             'admin.calificaciones.show_estudiante',
             'admin.calificaciones.show_admin',
+            'admin.calificaciones.edit',
             'admin.calificaciones.update',
-            'admin.calificaciones.destroy'
+            'admin.calificaciones.destroy',
+            'admin.calificaciones.reporte',
+            'admin.calificaciones.generar-reporte'
         ];
-        $docenteRole->givePermissionTo($calificacionPermissions);
-        $estudianteRole->givePermissionTo($calificacionPermissions);
-        $adminRole->givePermissionTo($calificacionPermissions);    
+        
+        // El administrador tiene todos los permisos
+        $adminRole->givePermissionTo($calificacionPermissions);
+
+        // El docente puede ver, crear, editar y generar reportes
+        $docenteRole->givePermissionTo([
+            'admin.calificaciones.index',
+            'admin.calificaciones.create',
+            'admin.calificaciones.store',
+            'admin.calificaciones.edit',
+            'admin.calificaciones.update',
+            'admin.calificaciones.show',
+            'admin.calificaciones.show_admin',
+            'admin.calificaciones.reporte',
+            'admin.calificaciones.generar-reporte'
+        ]);
+
+        // El estudiante solo puede ver sus calificaciones
+        $estudianteRole->givePermissionTo([
+            'admin.calificaciones.index',
+            'admin.calificaciones.show_estudiante'
+        ]);
+
+        // El director puede ver todo y generar reportes
+        $directorRole->givePermissionTo([
+            'admin.calificaciones.index',
+            'admin.calificaciones.show',
+            'admin.calificaciones.show_admin',
+            'admin.calificaciones.show_estudiante',
+            'admin.calificaciones.reporte',
+            'admin.calificaciones.generar-reporte'
+        ]);
     }
 }

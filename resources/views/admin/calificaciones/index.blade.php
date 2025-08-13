@@ -5,11 +5,23 @@
     <hr>
 @stop
 
-@section('content')
+@se    <!-- Modales para Reportes -->
+@foreach($asignaciones as $asignacion)
+    @can('admin.calificaciones.reporte')
+    <div class="modal fade" id="modalReporte{{ $asignacion->id }}" tabindex="-1" role="dialog" aria-labelledby="modalReporteLabel{{ $asignacion->id }}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalReporteLabel{{ $asignacion->id }}">Generar Reporte de Calificaciones</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>ent')
 <div class="row">
     <div class="col-md-12">
         <div class="card card-outline card-primary">
             <div class="card-header d-flex justify-content-between align-items-center">
+                @can('admin.calificaciones.index')
                 <div class="d-flex align-items-center">
                     <label for="mostrar" class="mr-2 mb-0">Mostrar</label>
                     <select id="mostrar" class="form-control form-control-sm" style="width: auto;">
@@ -25,6 +37,7 @@
                     <label for="buscar" class="mr-2 mb-0">Buscador:</label>
                     <input type="text" id="buscar" class="form-control form-control-sm" style="width: 200px;">
                 </div>
+                @endcan
             </div>
 
             <div class="card-body">
@@ -47,6 +60,7 @@
                 @endif
 
                 <!-- Botones de exportación -->
+                @can('admin.calificaciones.reporte')
                 <div class="mb-3">
                     <button class="btn btn-secondary btn-sm" id="copiar">
                         <i class="fas fa-copy"></i> COPIAR
@@ -64,6 +78,7 @@
                         <i class="fas fa-print"></i> IMPRIMIR
                     </button>
                 </div>
+                @endcan
 
                 <div class="table-responsive">
                     <table id="asignacionesTable" class="table table-bordered table-striped table-hover table-sm">
@@ -102,23 +117,23 @@
                                     <td><span class="badge badge-warning">{{ $asignacion->turno->nombre }}</span></td>
                                     <td>{{ $asignacion->fecha_asignacion ? $asignacion->fecha_asignacion->format('d/m/Y') : 'No registrada' }}</td>
                                     <td class="text-center">
-                                        @can('admin.calificaciones.create')
+                                        @if(auth()->user()->hasAnyPermission(['admin.calificaciones.create', 'admin.calificaciones.store']))
                                             <a href="{{ route('admin.calificaciones.create', $asignacion->id) }}" 
                                                class="btn btn-success btn-sm mr-1" 
                                                title="Registrar Calificación">
                                                 <i class="fas fa-edit"></i> Calificar
                                             </a>
-                                        @endcan
+                                        @endif
 
-                                        @can('admin.calificaciones.index')
+                                        @if(auth()->user()->hasAnyPermission(['admin.calificaciones.show_admin', 'admin.calificaciones.show']))
                                             <a href="{{ route('admin.calificaciones.show_admin', $asignacion->id) }}" 
                                                class="btn btn-info btn-sm mr-1" 
                                                title="Ver Calificaciones">
                                                 <i class="fas fa-eye"></i> Ver
                                             </a>
-                                        @endcan
+                                        @endif
 
-                                        @can('admin.calificaciones.reporte')
+                                        @if(auth()->user()->hasAnyPermission(['admin.calificaciones.reporte', 'admin.calificaciones.generar-reporte']))
                                             <button type="button" 
                                                     class="btn btn-warning btn-sm" 
                                                     data-toggle="modal" 
@@ -126,7 +141,7 @@
                                                     title="Generar Reporte">
                                                 <i class="fas fa-chart-bar"></i> Reporte
                                             </button>
-                                        @endcan
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -191,6 +206,7 @@
             </div>
         </div>
     </div>
+    @endcan
 @endforeach
 @stop
 

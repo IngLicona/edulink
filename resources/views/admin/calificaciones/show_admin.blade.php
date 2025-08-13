@@ -18,9 +18,11 @@
                     <h3>Detalles de la Asignación</h3>
                 </div>
                 <div class="col text-right">
+                    @can('admin.calificaciones.create')
                     <a href="{{ route('admin.calificaciones.create', $asignacion->id) }}" class="btn btn-primary">
                         <i class="fas fa-plus-circle"></i> Nueva Calificación
                     </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -118,10 +120,12 @@
                                         {{ $periodosConNotas > 0 ? round($promedioFinal / $periodosConNotas, 2) : '-' }}
                                     </td>
                                     <td>
+                                        @can('admin.calificaciones.show_estudiante')
                                         <a href="{{ route('admin.calificaciones.show_estudiante', ['id_asignacion' => $asignacion->id, 'id_estudiante' => $estudiante->id]) }}"
                                            class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i> Ver Detalle
                                         </a>
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach
@@ -155,10 +159,14 @@
                                     <td>{{ $calificacion->tipo }}</td>
                                     <td>{{ $calificacion->descripcion }}</td>
                                     <td>
+                                        @can('admin.calificaciones.edit')
                                         <a href="{{ route('admin.calificaciones.edit', $calificacion->id) }}"
                                            class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i> Editar
                                         </a>
+                                        @endcan
+                                        
+                                        @can('admin.calificaciones.destroy')
                                         <form action="{{ route('admin.calificaciones.destroy', $calificacion->id) }}"
                                               method="POST"
                                               style="display: inline;"
@@ -169,6 +177,7 @@
                                                 <i class="fas fa-trash"></i> Eliminar
                                             </button>
                                         </form>
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach
@@ -184,9 +193,11 @@
     @endif
 
     <div class="text-right mt-4">
+        @can('admin.calificaciones.generar-reporte')
         <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalReporte">
             <i class="fas fa-file-pdf"></i> Generar Reporte
         </button>
+        @endcan
         <a href="{{ route('admin.calificaciones.index') }}"
            class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver

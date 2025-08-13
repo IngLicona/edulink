@@ -137,9 +137,11 @@
     </div>
 
     <div class="text-right mt-4 mb-4">
+        @can('admin.calificaciones.show_admin')
         <a href="{{ route('admin.calificaciones.show_admin', $asignacion->id) }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
+        @endcan
     </div>
 @stop
 

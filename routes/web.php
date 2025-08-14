@@ -12,7 +12,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'estudiante.activo'])->group(function () {
-    Route::get('/estudiante/home', [App\Http\Controllers\HomeController::class, 'estudianteHome'])->name('estudiante.home');
+    Route::get('/estudiante/dashboard', [App\Http\Controllers\HomeController::class, 'estudianteHome'])->name('estudiante.home');
     // Agregar aquí otras rutas específicas para estudiantes
 });
 
@@ -21,7 +21,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Rutas específicas para estudiantes
     Route::middleware(['role:ESTUDIANTE'])->group(function () {
-        Route::get('/estudiante/dashboard', [App\Http\Controllers\HomeController::class, 'estudianteHome'])->name('estudiante.home');
+        // Ya manejado por el middleware anterior
     });
 
     // Rutas específicas para docentes
@@ -179,9 +179,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/admin/roles/{id}',  [App\Http\Controllers\RoleController::class, 'destroy'])
         ->name('admin.roles.destroy')
         ->middleware('can:admin.roles.delete');
-    Route::get('/admin/roles/permisos/{id}', [App\Http\Controllers\RoleController::class, 'permisos'])
-        ->name('admin.roles.permisos')
-        ->middleware('can:admin.roles.permisos');
     Route::get('admin/roles/{role}/permisos', [App\Http\Controllers\RoleController::class, 'permisos'])
         ->name('admin.roles.permisos')
         ->middleware('can:admin.roles.permisos');

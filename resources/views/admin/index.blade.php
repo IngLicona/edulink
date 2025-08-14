@@ -132,8 +132,32 @@
             </div>
         </div>
 
+    </div>
 
+    <div class="row mt-4">
+        <!-- Gráfica de Estudiantes Matriculados -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Total de Estudiantes Matriculados por Año</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="matriculadosChart"></canvas>
+                </div>
+            </div>
+        </div>
 
+        <!-- Gráfica de Pagos por Mes -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Total de Pagos por Mes</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="pagosChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 @stop
 
@@ -143,5 +167,68 @@
 @stop
 
 @section('js')
-    <script> console.log("Hi, I'm using the Laravel-AdminLTE package!"); </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Gráfica de Estudiantes Matriculados
+        const matriculadosCtx = document.getElementById('matriculadosChart').getContext('2d');
+        const matriculadosData = {!! json_encode($estudiantes_por_anio) !!};
+        console.log('Datos de matriculados:', matriculadosData); // Para depuración
+        new Chart(matriculadosCtx, {
+            type: 'bar', // Cambiado a barras para mejor visualización
+            data: {
+                labels: matriculadosData.map(item => item.anio),
+                datasets: [{
+                    label: 'Estudiantes Matriculados',
+                    data: matriculadosData.map(item => parseInt(item.total)),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Estudiantes Matriculados por Año'
+                    }
+                }
+            }
+        });
+
+        // Gráfica de Pagos por Mes
+        const pagosCtx = document.getElementById('pagosChart').getContext('2d');
+        new Chart(pagosCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($pagos_por_mes->pluck('mes')) !!},
+                datasets: [{
+                    label: 'Total de Pagos',
+                    data: {!! json_encode($pagos_por_mes->pluck('total')) !!},
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 @stop

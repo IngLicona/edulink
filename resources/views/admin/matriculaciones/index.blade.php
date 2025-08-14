@@ -52,38 +52,6 @@
                     </div>
                 @endif
 
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                @endif
-
-                <!-- Botones de exportación -->
-                <div class="mb-3">
-                    <button class="btn btn-secondary btn-sm" id="copiar">
-                        <i class="fas fa-copy"></i> COPIAR
-                    </button>
-                    <button class="btn btn-danger btn-sm" id="pdf">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
-                    <button class="btn btn-info btn-sm" id="csv">
-                        <i class="fas fa-file-csv"></i> CSV
-                    </button>
-                    <button class="btn btn-success btn-sm" id="excel">
-                        <i class="fas fa-file-excel"></i> EXCEL
-                    </button>
-                    <button class="btn btn-warning btn-sm" id="imprimir">
-                        <i class="fas fa-print"></i> IMPRIMIR
-                    </button>
-                </div>
-
                 <div class="table-responsive">
                     <table id="matriculacionesTable" class="table table-bordered table-striped table-hover table-sm">
                         <thead class="bg-light">
@@ -409,12 +377,12 @@
 
 <!-- Modal de Creación -->
 <div class="modal fade" id="ModalCreate" tabindex="-1" role="dialog" aria-labelledby="ModalCreateLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="ModalCreateLabel">Nueva Matriculación</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
@@ -429,17 +397,44 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Estudiante *</label>
-                                <select name="estudiante_id" class="form-control estudiante-select" required>
-                                    <option value="">Seleccione un estudiante</option>
+                                <select name="estudiante_id" class="form-control estudiante-select-search" required>
+                                    <option value="">Buscar estudiante por nombre o CI...</option>
                                     @foreach($estudiantes as $estudiante)
-                                        <option value="{{ $estudiante->id }}" {{ old('estudiante_id') == $estudiante->id ? 'selected' : '' }}>
-                                            {{ $estudiante->paterno }} {{ $estudiante->materno }} {{ $estudiante->nombre }} - CI: {{ $estudiante->ci }}
+                                        @php
+                                            $edad = \Carbon\Carbon::parse($estudiante->fecha_nacimiento)->age;
+                                            $recomendacion = '';
+                                            if ($edad >= 3 && $edad <= 5) {
+                                                $recomendacion = 'KINDER';
+                                            } elseif ($edad >= 6 && $edad <= 11) {
+                                                $recomendacion = 'PRIMARIA';
+                                            } elseif ($edad >= 12 && $edad <= 14) {
+                                                $recomendacion = 'SECUNDARIA';
+                                            }
+                                            $nombreCompleto = $estudiante->nombre . ' ' . $estudiante->paterno . ' ' . $estudiante->materno;
+                                        @endphp
+                                        <option value="{{ $estudiante->id }}" 
+                                                data-edad="{{ $edad }}"
+                                                data-ci="{{ $estudiante->ci }}"
+                                                data-telefono="{{ $estudiante->telefono }}"
+                                                data-genero="{{ ucfirst($estudiante->genero) }}"
+                                                data-recomendacion="{{ $recomendacion }}"
+                                                {{ old('estudiante_id') == $estudiante->id ? 'selected' : '' }}
+                                                data-nombre="{{ $nombreCompleto }}">
+                                            {{ $nombreCompleto }} - CI: {{ $estudiante->ci }}
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="form-text text-muted mt-2">
+                                    Busque por nombre, apellido o CI. Se mostrará la edad y recomendación de grado para cada estudiante.
+                                </small>
                                 @error('estudiante_id')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
+
+                                <!-- Info del estudiante -->
+                                <div id="info-estudiante" class="mt-3" style="display: none;">
+                                    <!-- El contenido se generará dinámicamente via JavaScript -->
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -557,8 +552,11 @@
 @stop
 
 @section('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap4.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
     <style>
         .btn-sm {
             padding: 0.25rem 0.5rem;
@@ -592,6 +590,146 @@
         .btn-warning {
             color: #212529 !important;
         }
+        /* Estilos mejorados para Select2 */
+        .select2-result-student-custom {
+            padding: 12px !important;
+            border-bottom: 1px solid #e9ecef;
+            min-height: auto !important;
+        }
+        .select2-result-student-custom:last-child {
+            border-bottom: none;
+        }
+        
+        .student-name-display {
+            font-weight: bold !important;
+            color: #333 !important;
+            font-size: 1.1em !important;
+            margin-bottom: 8px !important;
+            border-bottom: 2px solid #e9ecef !important;
+            padding-bottom: 5px !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            display: block !important;
+            width: 100% !important;
+        }
+        
+        .student-info-grid-custom {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 15px !important;
+            font-size: 0.9em !important;
+            color: #666 !important;
+            margin-bottom: 10px !important;
+            width: 100% !important;
+        }
+        
+        .info-item {
+            display: flex !important;
+            align-items: center !important;
+            min-width: 120px !important;
+            white-space: nowrap !important;
+            flex: 1 1 auto !important;
+        }
+        
+        .info-icon {
+            margin-right: 8px !important;
+            color: #007bff !important;
+            flex-shrink: 0 !important;
+            width: 16px !important;
+        }
+        
+        .student-recommendation {
+            margin-top: 8px !important;
+            width: 100% !important;
+        }
+        
+        /* Forzar layout horizontal */
+        .select2-container--bootstrap4 .select2-results__option {
+            padding: 0 !important;
+            margin: 2px !important;
+            display: block !important;
+            width: 100% !important;
+        }
+        
+        .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected] {
+            background-color: #f8f9fa !important;
+            color: #333 !important;
+        }
+        
+        .select2-container--bootstrap4 .select2-results__option[aria-selected=true] {
+            background-color: #e9ecef !important;
+        }
+        
+        /* Prevenir texto vertical */
+        .select2-results__option * {
+            display: inline !important;
+            writing-mode: initial !important;
+            text-orientation: initial !important;
+        }
+        
+        .student-name-display,
+        .student-info-grid-custom,
+        .info-item,
+        .student-recommendation {
+            writing-mode: horizontal-tb !important;
+            text-orientation: mixed !important;
+            direction: ltr !important;
+        }
+        .student-info-highlight {
+            margin-top: 8px;
+        }
+        .edad-badge {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
+        .select2-container--bootstrap4 .select2-results__option {
+            padding: 0;
+            margin: 2px;
+        }
+        .select2-container--bootstrap4 .select2-results__option--highlighted[aria-selected] {
+            background-color: #f8f9fa !important;
+            color: #333 !important;
+        }
+        .select2-container--bootstrap4 .select2-results__option[aria-selected=true] {
+            background-color: #e9ecef !important;
+        }
+        .alert {
+            margin-bottom: 0 !important;
+        }
+        .alert-info {
+            background-color: #e3f2fd;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        .select2-container--bootstrap4 .select2-selection--single {
+            height: calc(1.5em + 0.75rem + 2px) !important;
+        }
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+            color: #757575;
+            line-height: calc(1.5em + 0.75rem);
+        }
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+            position: absolute;
+            top: 50%;
+            right: 3px;
+            width: 20px;
+        }
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow b {
+            top: 60%;
+            border-color: #343a40 transparent transparent transparent;
+            border-style: solid;
+            border-width: 5px 4px 0 4px;
+            width: 0;
+            height: 0;
+            left: 50%;
+            margin-left: -4px;
+            margin-top: -2px;
+            position: absolute;
+        }
     </style>
 @stop
 
@@ -606,6 +744,16 @@
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Agregar este script al final -->
+<script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+</script>
 
 <script>
     @if($errors->any())
@@ -615,6 +763,195 @@
     @endif
 
     $(document).ready(function() {
+        // Inicializar Select2 para la búsqueda de estudiantes
+        $('.estudiante-select-search').select2({
+            theme: 'bootstrap4',
+            placeholder: 'Buscar estudiante por nombre o CI...',
+            allowClear: true,
+            width: '100%',
+            dropdownAutoWidth: true,
+            language: {
+                noResults: function() {
+                    return "No se encontraron resultados";
+                },
+                searching: function() {
+                    return "Buscando...";
+                }
+            },
+            matcher: function(params, data) {
+                if (!params.term) {
+                    return data;
+                }
+
+                if (data.id === '') {
+                    return null;
+                }
+
+                var searchText = params.term.toLowerCase();
+                var dataText = data.text.toLowerCase();
+                var $element = $(data.element);
+                var ci = $element.data('ci') ? $element.data('ci').toString().toLowerCase() : '';
+                var nombre = $element.data('nombre') ? $element.data('nombre').toLowerCase() : '';
+
+                if (dataText.indexOf(searchText) > -1 || 
+                    ci.indexOf(searchText) > -1 || 
+                    nombre.indexOf(searchText) > -1) {
+                    return data;
+                }
+
+                return null;
+            },
+            escapeMarkup: function(markup) {
+                return markup;
+            },
+            templateResult: function(data) {
+                if (data.loading) return data.text;
+                if (!data.element) return data.text;
+
+                var $element = $(data.element);
+                var edad = $element.data('edad') || 'N/A';
+                var ci = $element.data('ci') || 'N/A';
+                var telefono = $element.data('telefono') || 'N/A';
+                var genero = $element.data('genero') || 'N/A';
+                var recomendacion = $element.data('recomendacion') || '';
+                
+                // Usar el texto del option directamente y limpiarlo
+                var nombreDisplay = data.text;
+                if (nombreDisplay && nombreDisplay.indexOf(' - CI:') > -1) {
+                    nombreDisplay = nombreDisplay.split(' - CI:')[0].trim();
+                }
+                
+                // Crear el HTML de manera más robusta
+                var $container = $('<div class="select2-result-student-custom"></div>');
+                
+                // Nombre del estudiante
+                var $nombre = $('<div class="student-name-display"></div>').text(nombreDisplay);
+                $container.append($nombre);
+                
+                // Grid de información
+                var $infoGrid = $('<div class="student-info-grid-custom"></div>');
+                
+                // CI
+                var $ciDiv = $('<div class="info-item"></div>');
+                $ciDiv.append($('<i class="fas fa-id-card info-icon"></i>'));
+                $ciDiv.append($('<span></span>').text('CI: ' + ci));
+                $infoGrid.append($ciDiv);
+                
+                // Edad
+                var $edadDiv = $('<div class="info-item"></div>');
+                $edadDiv.append($('<i class="fas fa-calendar-alt info-icon"></i>'));
+                $edadDiv.append($('<span></span>').text('Edad: ' + edad + ' años'));
+                $infoGrid.append($edadDiv);
+                
+                // Género
+                var $generoDiv = $('<div class="info-item"></div>');
+                var iconoGenero = (genero && genero.toLowerCase() === 'masculino') ? 'male' : 'female';
+                $generoDiv.append($('<i class="fas fa-' + iconoGenero + ' info-icon"></i>'));
+                $generoDiv.append($('<span></span>').text(genero));
+                $infoGrid.append($generoDiv);
+                
+                $container.append($infoGrid);
+                
+                // Recomendación
+                if (recomendacion && recomendacion.trim() !== '') {
+                    var $recomendacionDiv = $('<div class="student-recommendation"></div>');
+                    var $alertDiv = $('<div class="alert alert-info p-2 mb-0"></div>');
+                    $alertDiv.append($('<i class="fas fa-graduation-cap"></i>'));
+                    $alertDiv.append($('<strong></strong>').text(' Recomendación: '));
+                    $alertDiv.append($('<span></span>').text(recomendacion));
+                    $recomendacionDiv.append($alertDiv);
+                    $container.append($recomendacionDiv);
+                }
+                
+                return $container[0].outerHTML;
+            }
+        });
+
+        // Reinicializar Select2 cuando se abra el modal
+        $('#ModalCreate').on('shown.bs.modal', function () {
+            $('.estudiante-select-search').select2({
+                theme: 'bootstrap4',
+                dropdownParent: $('#ModalCreate')
+            });
+        });
+
+        // Manejar el cambio de estudiante
+        $('.estudiante-select-search').on('select2:select', function(e) {
+            var data = e.params.data;
+            var $option = $(data.element);
+            
+            if ($option.length) {
+                var edad = $option.data('edad') || 'No disponible';
+                var ci = $option.data('ci') || 'No disponible';
+                var telefono = $option.data('telefono') || 'No disponible';
+                var genero = $option.data('genero') || 'No especificado';
+                var recomendacion = $option.data('recomendacion');
+                var nombre = $option.data('nombre');
+
+                // Actualizar la información visible
+                $('#info-estudiante').fadeIn();
+                
+                // Información básica
+                var infoHtml = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="fas fa-user-graduate text-primary"></i> 
+                                ${nombre}
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><i class="fas fa-birthday-cake text-info"></i> <strong>Edad:</strong> ${edad} años</p>
+                                    <p><i class="fas fa-id-card text-success"></i> <strong>CI:</strong> ${ci}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><i class="fas fa-venus-mars text-warning"></i> <strong>Género:</strong> ${genero || 'No especificado'}</p>
+                                    <p><i class="fas fa-phone text-danger"></i> <strong>Teléfono:</strong> ${telefono || 'No registrado'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                
+                $('#info-estudiante').html(infoHtml);
+
+                // Mostrar recomendación si existe
+                if (recomendacion) {
+                    var recomendacionHtml = `
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-graduation-cap"></i>
+                            <strong>Nivel Recomendado:</strong> ${recomendacion}
+                        </div>`;
+                    $('#info-estudiante').append(recomendacionHtml);
+                    
+                    // Preseleccionar el nivel recomendado
+                    $('.nivel-select option').each(function() {
+                        if ($(this).text().trim().toUpperCase().includes(recomendacion.trim().toUpperCase())) {
+                            $('.nivel-select').val($(this).val()).trigger('change');
+                        }
+                    });
+                }
+            } else {
+                $('#info-estudiante').hide();
+            }
+        });
+
+        // Eventos para verificar disponibilidad
+        $('.gestion-select').on('change', function() {
+            var gestionId = $(this).val();
+            var estudianteId = $(this).closest('.modal').find('select[name="estudiante_id"]').val();
+            if (estudianteId) {
+                verificarDisponibilidad(gestionId, estudianteId);
+            }
+        });
+
+        $('select[name="estudiante_id"]').on('change', function() {
+            var estudianteId = $(this).val();
+            var gestionId = $(this).closest('.modal').find('.gestion-select').val();
+            if (gestionId) {
+                verificarDisponibilidad(gestionId, estudianteId);
+            }
+        });
+
         // Verificar si hay datos para la tabla
         var hasData = {{ count($matriculaciones) > 0 ? 'true' : 'false' }};
         var table;
@@ -727,8 +1064,9 @@
         // Funcionalidad para selección cascada (Nivel -> Grado -> Paralelo)
         $('.nivel-select').on('change', function() {
             var nivelId = $(this).val();
-            var gradoSelect = $(this).closest('.modal').find('.grado-select');
-            var paraleloSelect = $(this).closest('.modal').find('.paralelo-select');
+            var form = $(this).closest('form');
+            var gradoSelect = form.find('.grado-select');
+            var paraleloSelect = form.find('.paralelo-select');
             
             // Limpiar selects dependientes
             gradoSelect.html('<option value="">Seleccione un grado</option>');
@@ -738,13 +1076,33 @@
                 $.ajax({
                     url: '{{ route("admin.matriculaciones.grados-by-nivel") }}',
                     type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        nivel_id: nivelId
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
+                    data: { nivel_id: nivelId },
                     success: function(response) {
-                        $.each(response, function(key, grado) {
-                            gradoSelect.append('<option value="' + grado.id + '">' + grado.nombre + '</option>');
+                        console.log('Respuesta de grados:', response);
+                        if (response.success && response.data && response.data.length > 0) {
+                            response.data.forEach(function(grado) {
+                                gradoSelect.append(new Option(grado.nombre, grado.id));
+                            });
+                            console.log('Grados cargados exitosamente');
+                        } else {
+                            console.log('No se encontraron grados');
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Sin grados',
+                                text: response.message || 'No se encontraron grados para el nivel seleccionado'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar grados:', error);
+                        gradoSelect.html('<option value="">Error al cargar grados</option>');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudieron cargar los grados. Por favor, intente nuevamente.'
                         });
                     }
                 });
@@ -753,7 +1111,8 @@
 
         $('.grado-select').on('change', function() {
             var gradoId = $(this).val();
-            var paraleloSelect = $(this).closest('.modal').find('.paralelo-select');
+            var form = $(this).closest('form');
+            var paraleloSelect = form.find('.paralelo-select');
             
             // Limpiar select dependiente
             paraleloSelect.html('<option value="">Seleccione un paralelo</option>');
@@ -762,50 +1121,94 @@
                 $.ajax({
                     url: '{{ route("admin.matriculaciones.paralelos-by-grado") }}',
                     type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        grado_id: gradoId
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
+                    data: { grado_id: gradoId },
                     success: function(response) {
-                        $.each(response, function(key, paralelo) {
-                            paraleloSelect.append('<option value="' + paralelo.id + '">' + paralelo.nombre + '</option>');
+                        console.log('Respuesta de paralelos:', response);
+                        if (response.success && response.data && response.data.length > 0) {
+                            response.data.forEach(function(paralelo) {
+                                paraleloSelect.append(new Option(paralelo.nombre, paralelo.id));
+                            });
+                            console.log('Paralelos cargados exitosamente');
+                        } else {
+                            console.log('No se encontraron paralelos');
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Sin paralelos',
+                                text: response.message || 'No se encontraron paralelos para el grado seleccionado'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al cargar paralelos:', error);
+                        paraleloSelect.html('<option value="">Error al cargar paralelos</option>');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudieron cargar los paralelos. Por favor, intente nuevamente.'
                         });
                     }
                 });
             }
         });
 
-        // Filtrar estudiantes disponibles por gestión
-        $('.gestion-select').on('change', function() {
-            var gestionId = $(this).val();
-            var estudianteSelect = $(this).closest('.modal').find('select[name="estudiante_id"]');
-            
-            if (gestionId) {
-                $.ajax({
-                    url: '{{ route("admin.matriculaciones.estudiantes-disponibles") }}',
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        gestion_id: gestionId
-                    },
+        // Verificar disponibilidad cuando cambia la gestión o el estudiante
+        function verificarDisponibilidad(gestionId, estudianteId) {
+            if (!gestionId || !estudianteId) return;
+
+            $.ajax({
+                url: '{{ route("admin.matriculaciones.estudiantes-disponibles") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    gestion_id: gestionId,
+                    estudiante_id: estudianteId
+                },
                     success: function(response) {
-                        estudianteSelect.html('<option value="">Seleccione un estudiante</option>');
-                        $.each(response, function(key, estudiante) {
-                            estudianteSelect.append(
-                                '<option value="' + estudiante.id + '">' + 
-                                estudiante.nombre_completo + ' - CI: ' + estudiante.ci +
-                                '</option>'
-                            );
-                        });
+                        if (response.error) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Estudiante ya matriculado',
+                                text: response.error,
+                                confirmButtonText: 'Entendido'
+                            });
+                            estudianteSelect.val('').trigger('change');
+                            return;
+                        }
+
+                        // Mantener el estudiante seleccionado
+                        var selectedEstudianteId = estudianteSelect.val();
+                        
+                        // Verificar si el estudiante ya está matriculado
+                        if (selectedEstudianteId) {
+                            var isMatriculado = !response.some(function(estudiante) {
+                                return estudiante.id == selectedEstudianteId;
+                            });
+                            
+                            if (isMatriculado) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Estudiante ya matriculado',
+                                    text: 'El estudiante seleccionado ya está matriculado en esta gestión.',
+                                    confirmButtonText: 'Entendido'
+                                });
+                                estudianteSelect.val('').trigger('change');
+                            }
+                        }
                     },
                     error: function() {
-                        // Si hay error, mostrar todos los estudiantes
-                        estudianteSelect.html($('.estudiante-select:first').html());
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al verificar la disponibilidad del estudiante',
+                            confirmButtonText: 'Entendido'
+                        });
                     }
                 });
             }
         });
-    });
 
     // Confirmación de eliminación con SweetAlert
     document.querySelectorAll('.form-eliminar').forEach(form => {

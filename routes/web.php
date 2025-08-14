@@ -11,8 +11,34 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/home', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index.home')->middleware('auth');
-Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index')->middleware('auth');
+Route::middleware(['auth', 'estudiante.activo'])->group(function () {
+    Route::get('/estudiante/home', [App\Http\Controllers\HomeController::class, 'estudianteHome'])->name('estudiante.home');
+    // Agregar aquí otras rutas específicas para estudiantes
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    
+    // Rutas específicas para estudiantes
+    Route::middleware(['role:ESTUDIANTE'])->group(function () {
+        Route::get('/estudiante/dashboard', [App\Http\Controllers\HomeController::class, 'estudianteHome'])->name('estudiante.home');
+    });
+
+    // Rutas específicas para docentes
+    Route::middleware(['role:DOCENTE'])->group(function () {
+        Route::get('/docente/dashboard', [App\Http\Controllers\HomeController::class, 'docenteHome'])->name('docente.home');
+    });
+
+    // Rutas específicas para cajeros
+    Route::middleware(['role:CAJERO/A'])->group(function () {
+        Route::get('/cajero/dashboard', [App\Http\Controllers\HomeController::class, 'cajeroHome'])->name('cajero.home');
+    });
+
+    // Rutas para administrador y director
+    Route::middleware(['role:ADMINISTRADOR|DIRECTOR/A GENERAL'])->group(function () {
+        Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
+    });
+});
 
 //rutas para la configuracion del sistema
 Route::middleware(['auth'])->group(function () {

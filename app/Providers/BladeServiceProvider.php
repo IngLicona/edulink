@@ -111,5 +111,16 @@ class BladeServiceProvider extends ServiceProvider
         Blade::directive('endnoActions', function () {
             return '<?php endif; ?>';
         });
+
+        // Directiva para ver modal
+        Blade::directive('modalView', function ($expression) {
+            $params = eval("return $expression;");
+            $module = $params['module'] ?? '';
+            return "<?php if(auth()->check() && auth()->user()->can('admin.{$module}.show')): ?>";
+        });
+
+        Blade::directive('endmodalView', function () {
+            return '<?php endif; ?>';
+        });
     }
 }

@@ -198,4 +198,31 @@ class Estudiante extends Model
             ->where('estado', 'activo')
             ->exists();
     }
+
+    /**
+     * Verificar si está matriculado en la gestión actual
+     */
+    public function estaMatriculadoActualmente()
+    {
+        // Obtener la gestión actual basada en la fecha actual
+        $anioActual = date('Y');
+        $gestionActual = Gestion::whereIn('nombre', [$anioActual, (string)((int)$anioActual - 1)])
+            ->orderBy('nombre', 'desc')
+            ->first();
+            
+        if (!$gestionActual) return false;
+
+        return $this->matriculaciones()
+            ->where('gestion_id', $gestionActual->id)
+            ->where('estado', 'activo')
+            ->exists();
+    }
+
+    /**
+     * Verificar si el estudiante puede acceder al sistema
+     */
+    public function puedeAccederSistema()
+    {
+        return $this->isActive() && $this->estaMatriculadoActualmente();
+    }
 }

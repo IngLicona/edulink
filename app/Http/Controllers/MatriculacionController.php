@@ -45,10 +45,28 @@ class MatriculacionController extends Controller
         
         $estudiantes = Estudiante::where('estado', 'activo')
             ->with('ppff')
-            ->orderBy('paterno')
-            ->orderBy('materno')
-            ->orderBy('nombre')
-            ->get();
+            ->get()
+            ->map(function($estudiante) {
+                $edad = $estudiante->fecha_nacimiento ? Carbon::parse($estudiante->fecha_nacimiento)->age : null;
+                // Recomendación de grado basada en la edad
+                $recomendacion = '';
+                if ($edad) {
+                    if ($edad >= 3 && $edad <= 5) {
+                        $recomendacion = 'Inicial';
+                    } elseif ($edad >= 6 && $edad <= 11) {
+                        $grado = $edad - 5; // 6 años = 1er grado, 7 años = 2do grado, etc.
+                        $recomendacion = $grado . '° de Primaria';
+                    } elseif ($edad >= 12 && $edad <= 17) {
+                        $grado = $edad - 11; // 12 años = 1er grado, 13 años = 2do grado, etc.
+                        $recomendacion = $grado . '° de Secundaria';
+                    }
+                }
+                
+                $estudiante->edad = $edad;
+                $estudiante->recomendacion_grado = $recomendacion;
+                return $estudiante;
+            })
+            ->sortBy('paterno');
         $turnos = Turno::all();
         $gestiones = Gestion::all();
         $niveles = Nivel::all();
@@ -125,7 +143,15 @@ class MatriculacionController extends Controller
             if ($estudiante->estado !== 'activo') {
                 DB::rollback();
                 return redirect()->back()
-                    ->with('error', 'No se puede matricular un estudiante inactivo')
+                    ->with('error', 'No se puede matricular un estudiante inactivo. El estudiante debe estar activo en el sistema para poder ser matriculado.')
+                    ->withInput();
+            }
+
+            // Verificar el estado de la matrícula
+            if ($request->estado === 'activo' && $estudiante->estado !== 'activo') {
+                DB::rollback();
+                return redirect()->back()
+                    ->with('error', 'No se puede crear una matrícula activa para un estudiante inactivo.')
                     ->withInput();
             }
 
@@ -527,19 +553,42 @@ class MatriculacionController extends Controller
      */
     public function getGradosByNivel(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'nivel_id' => 'required|exists:nivels,id'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'nivel_id' => 'required|exists:nivels,id'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => 'Nivel inválido'], 400);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Nivel inválido',
+                    'messages' => $validator->errors()
+                ], 400);
+            }
+
+            $grados = Grado::where('nivel_id', $request->nivel_id)
+                ->orderBy('nombre')
+                ->get();
+
+            if ($grados->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontraron grados para este nivel'
+                ]);
+            }
+                
+            return response()->json([
+                'success' => true,
+                'data' => $grados
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al obtener grados',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $grados = Grado::where('nivel_id', $request->nivel_id)
-            ->orderBy('nombre')
-            ->get(['id', 'nombre']);
-            
-        return response()->json($grados);
     }
 
     /**
@@ -547,19 +596,42 @@ class MatriculacionController extends Controller
      */
     public function getParalelosByGrado(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'grado_id' => 'required|exists:grados,id'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'grado_id' => 'required|exists:grados,id'
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => 'Grado inválido'], 400);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Grado inválido',
+                    'messages' => $validator->errors()
+                ], 400);
+            }
+
+            $paralelos = Paralelo::where('grado_id', $request->grado_id)
+                ->orderBy('nombre')
+                ->get();
+
+            if ($paralelos->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontraron paralelos para este grado'
+                ]);
+            }
+                
+            return response()->json([
+                'success' => true,
+                'data' => $paralelos
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al obtener paralelos',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $paralelos = Paralelo::where('grado_id', $request->grado_id)
-            ->orderBy('nombre')
-            ->get(['id', 'nombre']);
-            
-        return response()->json($paralelos);
     }
 
     /**
@@ -576,27 +648,43 @@ class MatriculacionController extends Controller
         }
 
         $gestionId = $request->gestion_id;
-        $estudiantesMatriculados = Matriculacion::where('gestion_id', $gestionId)
-            ->pluck('estudiante_id')
-            ->toArray();
+        $estudianteId = $request->estudiante_id;
 
+        // Si se proporciona un estudiante_id, verificar si ya está matriculado
+        if ($estudianteId) {
+            $matriculacionExistente = Matriculacion::where('gestion_id', $gestionId)
+                ->where('estudiante_id', $estudianteId)
+                ->first();
+
+            if ($matriculacionExistente) {
+                return response()->json([
+                    'error' => 'El estudiante ya está matriculado en esta gestión'
+                ]);
+            }
+        }
+
+        // Obtener todos los estudiantes activos
         $estudiantes = Estudiante::where('estado', 'activo')
-            ->whereNotIn('id', $estudiantesMatriculados)
             ->with('ppff')
             ->orderBy('paterno')
             ->orderBy('materno')
             ->orderBy('nombre')
             ->get();
 
-        return response()->json($estudiantes->map(function ($estudiante) {
+        return response()->json($estudiantes->map(function ($estudiante) use ($gestionId) {
             $nombreCompleto = $estudiante->paterno . ' ' . $estudiante->materno . ' ' . $estudiante->nombre;
+            $estaMatriculado = Matriculacion::where('gestion_id', $gestionId)
+                                          ->where('estudiante_id', $estudiante->id)
+                                          ->exists();
+            
             return [
                 'id' => $estudiante->id,
                 'text' => $nombreCompleto . ' - CI: ' . $estudiante->ci,
                 'nombre_completo' => $nombreCompleto,
                 'ci' => $estudiante->ci,
                 'ppff' => $estudiante->ppff ? $estudiante->ppff->nombre_completo : 'Sin PPFF',
-                'ppff_telefono' => $estudiante->ppff ? $estudiante->ppff->telefono : null
+                'ppff_telefono' => $estudiante->ppff ? $estudiante->ppff->telefono : null,
+                'esta_matriculado' => $estaMatriculado
             ];
         }));
     }

@@ -30,8 +30,18 @@ class PagoController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->get();
 
-        $estudiantes = Estudiante::with('usuario')->where('estado', 'activo')->get();
-        $matriculaciones = Matriculacion::with(['estudiante', 'gestion', 'grado', 'paralelo'])->get();
+        // Solo obtener estudiantes que tengan matriculación activa
+        $estudiantes = Estudiante::whereHas('matriculaciones', function($query) {
+            $query->where('estado', 'activo');
+        })->with(['matriculaciones' => function($query) {
+            $query->where('estado', 'activo')
+                  ->with(['gestion', 'grado', 'paralelo']);
+        }])->get();
+
+        // Solo obtener matriculaciones activas
+        $matriculaciones = Matriculacion::with(['estudiante', 'gestion', 'grado', 'paralelo'])
+            ->where('estado', 'activo')
+            ->get();
         
         return view('admin.pagos.index', [
             'pagos' => $pagos,

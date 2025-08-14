@@ -11,4 +11,21 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            input: {
+                app: 'resources/js/app.js',
+                css: 'resources/sass/app.scss'
+            }
+        }
+    },
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        hmr: {
+            host: 'localhost'
+        }
+    }
 });

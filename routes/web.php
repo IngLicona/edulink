@@ -8,7 +8,18 @@ use Illuminate\Support\Facades\Auth;
 Auth::routes(['register' => false]);
 
 Route::get('/', function () {
-    return view('welcome');
+    // Si el usuario está autenticado, redirigir a su dashboard
+    if (Auth::check()) {
+        return redirect()->route('home');
+    }
+    
+    // Intentar mostrar la vista de bienvenida simple primero
+    try {
+        return view('welcome-simple');
+    } catch (\Exception $e) {
+        // Si falla, redirigir directamente al login
+        return redirect()->route('login');
+    }
 });
 
 Route::middleware(['auth', 'estudiante.activo'])->group(function () {

@@ -763,6 +763,9 @@
     @endif
 
     $(document).ready(function() {
+        // Definir variables globales para los selects
+        var estudianteSelect = $('.estudiante-select-search');
+        
         // Inicializar Select2 para la búsqueda de estudiantes
         $('.estudiante-select-search').select2({
             theme: 'bootstrap4',
@@ -1174,12 +1177,12 @@
                                 text: response.error,
                                 confirmButtonText: 'Entendido'
                             });
-                            estudianteSelect.val('').trigger('change');
+                            $('.estudiante-select-search').val('').trigger('change');
                             return;
                         }
 
                         // Mantener el estudiante seleccionado
-                        var selectedEstudianteId = estudianteSelect.val();
+                        var selectedEstudianteId = $('.estudiante-select-search').val();
                         
                         // Verificar si el estudiante ya está matriculado
                         if (selectedEstudianteId) {
@@ -1194,7 +1197,7 @@
                                     text: 'El estudiante seleccionado ya está matriculado en esta gestión.',
                                     confirmButtonText: 'Entendido'
                                 });
-                                estudianteSelect.val('').trigger('change');
+                                $('.estudiante-select-search').val('').trigger('change');
                             }
                         }
                     },

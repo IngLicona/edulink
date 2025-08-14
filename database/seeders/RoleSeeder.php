@@ -172,10 +172,14 @@ class RoleSeeder extends Seeder
                 'admin.calificaciones.index',
                 'admin.calificaciones.create',
                 'admin.calificaciones.store',
+                'admin.calificaciones.show',
                 'admin.calificaciones.show_estudiante',
                 'admin.calificaciones.show_admin',
+                'admin.calificaciones.edit',
                 'admin.calificaciones.update',
                 'admin.calificaciones.destroy',
+                'admin.calificaciones.reporte',
+                'admin.calificaciones.generar-reporte',
         ];
 
         foreach ($permissions as $permission) {

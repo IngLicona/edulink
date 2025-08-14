@@ -13,6 +13,7 @@ use App\Models\Matriculacion;
 use App\Models\Pago;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -33,36 +34,170 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        $roles = $user->roles->pluck('name');
+
+        // Redirigir según el rol del usuario
+        if ($roles->contains('ESTUDIANTE')) {
+            return $this->estudianteHome();
+        } elseif ($roles->contains('DOCENTE')) {
+            return $this->docenteHome();
+        } elseif ($roles->contains('CAJERO/A')) {
+            return $this->cajeroHome();
+        } else {
+            // Dashboard para administrador y director
+            return $this->adminDashboard();
+        }
+    }
+
+    /**
+     * Dashboard para administrador y director
+     */
+    private function adminDashboard()
+    {
         $data = [
-            'paralelos' => Paralelo::count(),
-            'turnos' => Turno::count(),
-            'materias' => Materia::count(),
-            'roles' => 9, // Asumiendo que tienes 9 roles como en la imagen
-            'administrativos' => Personal::where('tipo', 'Administrativo')->count(),
-            'docentes' => Personal::where('tipo', 'Docente')->count(),
-            'ppff' => Ppff::count(),
-            'estudiantes' => Estudiante::count(),
+            'total_gestiones' => \App\Models\Gestion::count(),
+            'total_periodos' => \App\Models\Periodo::count(),
+            'total_niveles' => \App\Models\Nivel::count(),
+            'total_grados' => \App\Models\Grado::count(),
+            'total_paralelos' => Paralelo::count(),
+            'total_turnos' => Turno::count(),
+            'total_materias' => Materia::count(),
+            'total_roles' => 9,
+            'total_personal_administrativo' => Personal::where('tipo', 'Administrativo')->count(),
+            'total_personal_docente' => Personal::where('tipo', 'Docente')->count(),
+            'total_ppff' => Ppff::count(),
+            'total_estudiantes' => Estudiante::count(),
         ];
 
-        // Datos para la gráfica de estudiantes matriculados
-        $matriculados = Matriculacion::selectRaw('YEAR(created_at) as year, COUNT(*) as total')
-            ->groupBy('year')
-            ->orderBy('year')
+        // Datos para gráficas
+        $estudiantes_por_anio = Matriculacion::selectRaw('YEAR(created_at) as anio, COUNT(*) as total')
+            ->groupBy('anio')
+            ->orderBy('anio')
             ->get();
 
-        // Datos para la gráfica de pagos por mes
-        $pagos = Pago::selectRaw('MONTH(created_at) as month, SUM(monto) as total')
+        $pagos_por_mes = Pago::selectRaw('MONTH(created_at) as mes_num, COUNT(*) as total')
             ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy('month')
-            ->orderBy('month')
+            ->groupBy('mes_num')
+            ->orderBy('mes_num')
             ->get()
             ->map(function($item) {
                 return [
-                    'month' => Carbon::create()->month($item->month)->format('F'),
+                    'mes' => Carbon::create()->month($item->mes_num)->format('F'),
                     'total' => $item->total
                 ];
             });
 
-        return view('home', compact('data', 'matriculados', 'pagos'));
+        return view('admin.index', compact('data', 'estudiantes_por_anio', 'pagos_por_mes'));
+    }
+
+    /**
+     * Dashboard para estudiante
+     */
+    public function estudianteHome()
+    {
+        $user = Auth::user();
+        $estudiante = $user->estudiante;
+        
+        if (!$estudiante) {
+            return redirect()->route('login')->with('error', 'No se encontró información del estudiante');
+        }
+
+        // Obtener matriculación activa
+        $matriculacion = $estudiante->matriculaciones()
+            ->where('estado', 'activo')
+            ->with(['gestion', 'nivel', 'grado', 'paralelo', 'turno'])
+            ->first();
+
+        // Datos del usuario
+        $datos_usuario = [
+            'nombre' => $estudiante->nombre,
+            'apellidos' => $estudiante->paterno . ' ' . $estudiante->materno,
+            'ci' => $estudiante->ci,
+            'fecha_nacimiento' => $estudiante->fecha_nacimiento ? Carbon::parse($estudiante->fecha_nacimiento)->format('Y-m-d') : null,
+            'telefono' => $estudiante->telefono,
+            'direccion' => $estudiante->direccion,
+            'edad' => $estudiante->fecha_nacimiento ? Carbon::parse($estudiante->fecha_nacimiento)->age : null
+        ];
+
+        return view('estudiante.dashboard', compact('estudiante', 'matriculacion', 'datos_usuario'));
+    }
+
+    /**
+     * Dashboard para docente
+     */
+    public function docenteHome()
+    {
+        $user = Auth::user();
+        $personal = $user->personal;
+        
+        if (!$personal) {
+            return redirect()->route('login')->with('error', 'No se encontró información del personal docente');
+        }
+
+        // Obtener asignaciones activas del docente
+        $asignaciones = \App\Models\Asignacion::where('docente_id', $personal->id)
+            ->where('estado', 'activo')
+            ->with(['gestion', 'nivel', 'grado', 'paralelo', 'materia', 'turno'])
+            ->get();
+
+        // Datos del usuario
+        $datos_usuario = [
+            'nombre' => $personal->nombre,
+            'apellidos' => $personal->paterno . ' ' . $personal->materno,
+            'ci' => $personal->ci,
+            'fecha_nacimiento' => $personal->fecha_nacimiento ? Carbon::parse($personal->fecha_nacimiento)->format('Y-m-d') : null,
+            'telefono' => $personal->telefono,
+            'direccion' => $personal->direccion,
+            'especialidad' => $personal->especialidad,
+            'tipo' => $personal->tipo
+        ];
+
+        return view('docente.dashboard', compact('personal', 'asignaciones', 'datos_usuario'));
+    }
+
+    /**
+     * Dashboard para cajero
+     */
+    public function cajeroHome()
+    {
+        $user = Auth::user();
+        $personal = $user->personal;
+        
+        if (!$personal) {
+            return redirect()->route('login')->with('error', 'No se encontró información del personal');
+        }
+
+        // Estadísticas de pagos del día
+        $pagos_hoy = Pago::whereDate('created_at', today())->count();
+        $monto_hoy = Pago::whereDate('created_at', today())->sum('monto');
+        
+        // Pagos del mes
+        $pagos_mes = Pago::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        $monto_mes = Pago::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('monto');
+
+        // Datos del usuario
+        $datos_usuario = [
+            'nombre' => $personal->nombre,
+            'apellidos' => $personal->paterno . ' ' . $personal->materno,
+            'ci' => $personal->ci,
+            'fecha_nacimiento' => $personal->fecha_nacimiento ? Carbon::parse($personal->fecha_nacimiento)->format('Y-m-d') : null,
+            'telefono' => $personal->telefono,
+            'direccion' => $personal->direccion,
+            'tipo' => $personal->tipo
+        ];
+
+        $estadisticas = [
+            'pagos_hoy' => $pagos_hoy,
+            'monto_hoy' => $monto_hoy,
+            'pagos_mes' => $pagos_mes,
+            'monto_mes' => $monto_mes
+        ];
+
+        return view('cajero.dashboard', compact('personal', 'datos_usuario', 'estadisticas'));
     }
 }

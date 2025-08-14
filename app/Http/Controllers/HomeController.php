@@ -55,20 +55,18 @@ class HomeController extends Controller
      */
     private function adminDashboard()
     {
-        $data = [
-            'total_gestiones' => \App\Models\Gestion::count(),
-            'total_periodos' => \App\Models\Periodo::count(),
-            'total_niveles' => \App\Models\Nivel::count(),
-            'total_grados' => \App\Models\Grado::count(),
-            'total_paralelos' => Paralelo::count(),
-            'total_turnos' => Turno::count(),
-            'total_materias' => Materia::count(),
-            'total_roles' => 9,
-            'total_personal_administrativo' => Personal::where('tipo', 'Administrativo')->count(),
-            'total_personal_docente' => Personal::where('tipo', 'Docente')->count(),
-            'total_ppff' => Ppff::count(),
-            'total_estudiantes' => Estudiante::count(),
-        ];
+        $total_gestiones = \App\Models\Gestion::count();
+        $total_periodos = \App\Models\Periodo::count();
+        $total_niveles = \App\Models\Nivel::count();
+        $total_grados = \App\Models\Grado::count();
+        $total_paralelos = Paralelo::count();
+        $total_turnos = Turno::count();
+        $total_materias = Materia::count();
+        $total_roles = \Spatie\Permission\Models\Role::count();
+        $total_personal_administrativo = Personal::where('tipo', 'Administrativo')->count();
+        $total_personal_docente = Personal::where('tipo', 'Docente')->count();
+        $total_ppff = Ppff::count();
+        $total_estudiantes = Estudiante::count();
 
         // Datos para gráficas
         $estudiantes_por_anio = Matriculacion::selectRaw('YEAR(created_at) as anio, COUNT(*) as total')
@@ -88,7 +86,12 @@ class HomeController extends Controller
                 ];
             });
 
-        return view('admin.index', compact('data', 'estudiantes_por_anio', 'pagos_por_mes'));
+        return view('admin.index', compact(
+            'total_gestiones', 'total_periodos', 'total_niveles', 'total_grados', 
+            'total_paralelos', 'total_turnos', 'total_materias', 'total_roles', 
+            'total_personal_administrativo', 'total_personal_docente', 'total_estudiantes', 
+            'total_ppff', 'estudiantes_por_anio', 'pagos_por_mes'
+        ));
     }
 
     /**

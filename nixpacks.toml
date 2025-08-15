@@ -1,8 +1,5 @@
-[providers]
-php = "8.2"
-
 [phases.setup]
-nixPkgs = ['php82', 'php82Packages.composer', 'nodejs_18', 'python3']
+nixPkgs = ['php82', 'php82Packages.composer', 'nodejs_18']
 
 [phases.install]
 cmds = [

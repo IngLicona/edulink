@@ -5,15 +5,16 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/sass/app.scss',
+                'resources/sass/app.css',
                 'resources/js/app.js',
             ],
             refresh: true,
         }),
-    ],
+    ],  
     build: {
         manifest: true,
         outDir: 'public/build',
+        emptyOutDir: true,
         rollupOptions: {
             input: {
                 app: 'resources/js/app.js',
